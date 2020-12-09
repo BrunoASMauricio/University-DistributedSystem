@@ -1,6 +1,4 @@
-#include "udp.cpp"
-#include "network.cpp"
-
+#include "main.hpp"
 
 int main(int argc, char *argv[]){
 	int id;
@@ -19,6 +17,9 @@ int main(int argc, char *argv[]){
 	
 	id = atoi(argv[1]);
 	initNetwork(id);
+	net.multi_s.receiveHandle = &handleMulticast;
+	net.uni_s.receiveHandle = &handleUnicast;
+
 	/*
 	s = &(net.uni_sd);
 	setupUnicastClient(s, atoi(argv[2]));
