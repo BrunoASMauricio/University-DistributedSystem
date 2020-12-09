@@ -2,6 +2,9 @@
 #define UDP
 
 #include <string.h>
+#define SETBIT(bit,byte) byte |= (1 << bit)
+#define CLEARBIT(bit,byte) byte &= ~(1 << bit)
+#define CHECKBIT(bit,byte) (byte) & (1 << bit)
 
 #define MULTICAST_GROUP "239.255.0.1"
 #define INTERFACE_BASE_IP "127.0.0.0"

@@ -1,5 +1,47 @@
 #include "network.hpp"
 
+void setupTimeout(timeouts t_o){
+	timespec Res;
+	unsigned long int Act;
+	pthread_mutex_lock(&(net.t_s.lock));
+	
+	clock_gettime(CLOCK_REALTIME, &Res);
+	Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
+	SETBIT(t_o, net.t_s.timeouts);
+	switch(t_o){
+		case PROMISE:
+			net.t_s.promise_timeout = Act + PROMISE_TIMEOUT_PERIOD;
+			break;
+	}
+
+	pthread_mutex_unlock(&(net.t_s.lock));
+}
+
+void stopTimeout(timeouts t_o){
+	pthread_mutex_lock(&(net.t_s.lock));
+	CLEARBIT(t_o, net.t_s.timeouts);
+	pthread_mutex_unlock(&(net.t_s.lock));
+}
+
+void* timeoutHandler(void* dummy){
+	timespec Res;
+	unsigned long int Act;
+	
+	while(1){
+		clock_gettime(CLOCK_REALTIME, &Res);
+		Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
+		pthread_mutex_lock(&(net.t_s.lock));
+		if(CHECKBIT(PROMISE, net.t_s.timeouts)){
+			if(Act > net.t_s.promise_timeout){
+				//timeout();
+				// DO SOMETHING
+			}
+		}
+		printf("Nothing to timeout\n");
+		sleep(10);
+	}
+}
+
 void* listener(void* _sock){
 	uint16_t nbytes;
 	sock* s;

@@ -2,12 +2,26 @@
 #define NETWORK
 
 #include "udp.hpp"
+
+// Delay to time out in ns
+#define PROMISE_TIMEOUT_PERIOD 10E9
+
+enum timeouts{
+   	PROMISE,
+};
+
+typedef struct{
+	int timeouts;
+	pthread_mutex_t lock;
+	unsigned long int promise_timeout;
+}timeout_schedules;
+
 typedef struct{
 	sock uni_s;						// Unicast socket
 	sock multi_s;					// Multicast socket
 	int id;							// Network ID
+	timeout_schedules t_s;			// Timeout Scheduling
 }network;
-
 
 void*
 /*

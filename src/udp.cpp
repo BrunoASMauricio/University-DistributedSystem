@@ -6,7 +6,7 @@ void startSocket(sock* s){
 		exit(-1);
 	}
 	printf("UDP socket open\n");
-	socketBlocking(s, true);
+	//socketBlocking(s, true);
 }
 
 void socketBlocking(sock* s, bool set_block){
@@ -15,13 +15,15 @@ void socketBlocking(sock* s, bool set_block){
         printf("fcntl(F_SETFL) fail.");
 		exit(-1);
     }
+
 	if(set_block){
-	    opt |= O_NONBLOCK;
+		//SETBIT(O_NONBLOCK, opt);
 		printf("Socket set for non blocking\n");
 	}else{
-		opt &= ~(1 << O_NONBLOCK);
+		//CLEARBIT(O_NONBLOCK, opt);
 		printf("Socket set for blocking\n");
 	}
+
     if (fcntl(s->sd, F_SETFL, opt) < 0){
         printf("fcntl(F_SETFL) fail.");
 		exit(-1);

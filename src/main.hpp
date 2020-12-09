@@ -1,6 +1,9 @@
 #ifndef MAIN
 #define MAIN
 
+#include <pthread.h>
+
+
 #include "udp.cpp"
 #include "network.cpp"
 
