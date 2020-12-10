@@ -58,14 +58,14 @@ void* listener(void* _sock){
 			(struct sockaddr *) &(s->in_addr),
 			&addrlen
 		);
-		printf("nbytes: %d\n", nbytes);
+		printf("Received %d bytes\n", nbytes);
 		if(nbytes > 0){
 			//
 			// DO STUFF HERE
 			//
-			s->receiveHandle(inbuf, nbytes);
 			inbuf[nbytes] = '\0';
-			printf("Got > %s\n", inbuf);
+			s->receiveHandle(inbuf, nbytes);
+			//printf("Got > %s\n", inbuf);
 		}
 	}
 	return NULL;
@@ -102,6 +102,10 @@ void setupMulticast(sock* s){
 }
 
 void initNetwork(int id){
+	strcpy(net.multi_s.interface_addr, INTERFACE_BASE_IP);
+	net.multi_s.interface_addr[strlen(net.multi_s.interface_addr)-1] = '0'+id;
+	strcpy(net.uni_s.interface_addr, INTERFACE_BASE_IP);
+	net.uni_s.interface_addr[strlen(net.uni_s.interface_addr)-1] = '0'+id;
 	setupMulticast(&(net.multi_s));
 	setupUnicast(&(net.uni_s), id);
 	net.id = id;

@@ -34,12 +34,16 @@ void socketBlocking(sock* s, bool set_block){
 // --------- Multicast ---------
 void bindMulticastServer(sock* s){
     u_int yes = 1;
+	struct in_addr localInterface;
+
+	// Set port to be reused (all nodes use the same 2 ports)
     if (setsockopt(s->sd, SOL_SOCKET, SO_REUSEADDR, (char*) &yes, sizeof(yes)) < 0) {
        perror("Reusing ADDR failed");
 	   exit(EXIT_FAILURE);
     }
 	printf("Socket set up to be reused\n");
 
+	//
     memset(&(s->in_addr), 0, sizeof(s->in_addr));
     s->in_addr.sin_family = AF_INET;
     s->in_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -51,10 +55,19 @@ void bindMulticastServer(sock* s){
 		exit(EXIT_FAILURE);
     }
 
+	localInterface.s_addr = inet_addr (s->interface_addr);
+
+	if (setsockopt(s->sd, IPPROTO_IP, IP_MULTICAST_IF, (char *) &localInterface,sizeof (localInterface)) < 0){
+		perror ("Setting local interface error");
+		close(s->sd);
+		exit(EXIT_FAILURE);
+	}
+	printf ("Setting the local interface...OK\n");
+
 	// use setsockopt() to request that the kernel join a multicast group
     struct ip_mreq mreq;
     mreq.imr_multiaddr.s_addr = inet_addr(MULTICAST_GROUP);
-    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+    mreq.imr_interface.s_addr = htonl(INADDR_ANY);//inet_addr(s->interface_addr);//
     if (setsockopt(s->sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*) &mreq, sizeof(mreq)) < 0){
         perror("setsockopt");
 		close(s->sd);
@@ -126,8 +139,6 @@ void setupUnicastClient(sock* s, int target_addr){
 
 void setupUnicast(sock* s, int id){
 	startSocket(s);
-	strcpy(s->interface_addr, INTERFACE_BASE_IP);
-	s->interface_addr[strlen(s->interface_addr)-1] = '0'+id;
 	bindUnicastServer(s);
 }
 
