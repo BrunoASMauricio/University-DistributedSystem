@@ -53,7 +53,7 @@ void* listener(void* _sock){
 	while(1){
 		nbytes = recvfrom(s->sd,
 			inbuf,
-			sizeof(inbuf),
+			sizeof(inbuf)-1,			// -1 to temporarily accomodate a \0
 			0,
 			(struct sockaddr *) &(s->in_addr),
 			&addrlen
@@ -90,7 +90,8 @@ void multicastDispatcher(byte* out_buffer, uint16_t size){
 	dispatcher(&(net.multi_s), out_buffer, size);
 }
 
-void unicastDispatcher(byte* out_buffer, uint16_t size){
+void unicastDispatcher(byte* out_buffer, uint16_t size, uint8_t target_id){
+	setupUnicastClient(&(net.uni_s), target_id);
 	dispatcher(&(net.uni_s), out_buffer, size);
 }
 

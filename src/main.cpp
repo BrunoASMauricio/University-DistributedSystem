@@ -42,11 +42,20 @@ int main(int argc, char *argv[]){
 		printf("Error: Unable to create thread, %d\n", rc);
 		exit(EXIT_FAILURE);
 	}
+	
+	byte uni_buff[17] = "single hi from X";
+	uni_buff[15] = id + '0';
+	byte  multi_buff[16] = "multi hi from X";
+	multi_buff[14] = id + '0';
+	while(1){
+		unicastDispatcher(uni_buff, sizeof(uni_buff), atoi(argv[2]));
+		multicastDispatcher(multi_buff, sizeof(multi_buff));
+		sleep(1);
+	}
 
 
 	/*
 	s = &(net.uni_sd);
-	setupUnicastClient(s, atoi(argv[2]));
 	printf("ID: %d\n", id);
 	outbuf[19] = id % 10 + '0';
 	while(1){
@@ -71,10 +80,12 @@ int main(int argc, char *argv[]){
 }
 
 void handleMulticast(byte* in_buffer, uint16_t size){
-
+	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
+	printf("Received from multicast: %s\n", in_buffer);
 }
 
 void handleUnicast(byte* in_buffer, uint16_t size){
-
+	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
+	printf("Received from unicast: %s\n", in_buffer);
 }
 
