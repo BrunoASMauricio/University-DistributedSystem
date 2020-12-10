@@ -67,7 +67,7 @@ void bindMulticastServer(sock* s){
 	// use setsockopt() to request that the kernel join a multicast group
     struct ip_mreq mreq;
     mreq.imr_multiaddr.s_addr = inet_addr(MULTICAST_GROUP);
-    mreq.imr_interface.s_addr = htonl(INADDR_ANY);//inet_addr(s->interface_addr);//
+    mreq.imr_interface.s_addr = inet_addr(s->interface_addr);
     if (setsockopt(s->sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*) &mreq, sizeof(mreq)) < 0){
         perror("setsockopt");
 		close(s->sd);
