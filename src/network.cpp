@@ -43,10 +43,11 @@ void* timeoutHandler(void* dummy){
 }
 
 void* listener(void* _sock){
-	uint16_t nbytes;
 	sock* s;
+	uint16_t nbytes;
 	byte inbuf[1024];
 	socklen_t addrlen;
+	char sender_address[INET6_ADDRSTRLEN];
 
 	s = (sock*)_sock;
 
@@ -58,7 +59,18 @@ void* listener(void* _sock){
 			(struct sockaddr *) &(s->in_addr),
 			&addrlen
 		);
-		printf("Received %d bytes\n", nbytes);
+		s->in_addr.sin_addr.s_addr;
+		if(getnameinfo((struct sockaddr*)&(s->in_addr), addrlen, sender_address, sizeof(sender_address), 0, 0, NI_NUMERICHOST) != 0){
+			perror("getnameinfo");
+			continue;
+		}
+		
+		// Ignoring multicast sent by themselves
+		if(!strcmp(sender_address, s->interface_addr) || !strcmp(sender_address, "0.0.0.0")){
+			continue;
+		}
+
+		printf("Received %d bytes from %s: %s\n", nbytes, inbuf, sender_address);
 		if(nbytes > 0){
 			//
 			// DO STUFF HERE
