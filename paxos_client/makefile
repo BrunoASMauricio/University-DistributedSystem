@@ -10,7 +10,7 @@ CC = g++
 all: SDIS
 
 SDIS:
-	$(CC) -g -o sdis $(FLAGS) ./src/main.cpp
+	$(CC) -g -o paxos_client $(FLAGS) ./src/main.cpp
 
 
 
