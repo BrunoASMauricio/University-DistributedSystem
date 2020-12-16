@@ -14,6 +14,7 @@
 #define PROMISE_MSG 1
 #define ACCEPT_MSG  2
 #define ACK_MSG     3
+#define CLIENT_MSG	255
 
 #define TIMEOUT_MSG 4
 
