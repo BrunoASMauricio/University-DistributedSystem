@@ -4,81 +4,89 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "network.hpp"
 
-
-#define NUMBER_NODES 5
-
-//message types
+//message types , transition types
 #define PREPARE_MSG 0
 #define PROMISE_MSG 1
 #define ACCEPT_MSG  2
 #define ACK_MSG     3
 #define CLIENT_MSG	255
-
 #define TIMEOUT_MSG 4
+#define NULL_MSG -1
+
 
 //states of the the decisions
 #define INNIT_ACCEPTOR  0
-#define INNIT_PROPOSER  1
 #define WAITING_PREPARE 3
 #define WAITING_ACEPT   5
-#define WAITING_PROMISE 6
 #define DECISION_RDY    8 
-//setting
-#define MAX_DECISION 1
+
+#define INNIT_PROPOSER  1
+#define WAITING_PROMISE 6
+#define END_PHASE_1 13
+
 //role
 #define ACEPTOR 0
 #define PROPOSER 1
 
+//setting
+#define MAX_DECISION 1
+#define NUMBER_NODES 5
+
+
+
+
+// multicast identificator
 #define MULTICAST -1
 
 
-struct decision{
+struct paxos_state{
+    int decisionNumber;
     int state;
-    int Nnodes;
-    int id;
-    int val;
-    int PromId;
-    int PromVal;
+    int promMessageVal;
+    int promMessageID;
 
-    int decision_number;
+    int currentMessageID ;
+    int currentMessageVal;
+
+    int numReceivedPromises;
+    int numNodes;
 };
 
-
-struct message{
-    int decision_number;
-    int node_origin;
-
-    int type;   //message type
-    int id;   //parameter 1
-    int val;   //parameter 2
-};
-
-struct node{
-    //vetor de decisoes
-    struct decision dec_vector[MAX_DECISION];
+struct new_no{
+    struct paxos_state paxosStates[MAX_DECISION];
+    
+    int lastRunedStateId;
+    int windowSize;
     int role;
-    int lastprocessed_dec;
-    int lider_id;
+    int liderId;
     int id;
+    int lastPhase1complete;
+    int lastPhase1innit ;
+};
 
-
+struct transition{
+    int decisionNumber;
+    int name;
+    int messageId;
+    int messageVal;
+    int originNodeId;
+    int dstNodeId;
+    int promMessageId;
+    int promMessageVal;
 };
 
 
-void client_set_value ( struct decision *dec,int val);
-
-void send_message_paxos (int type, struct decision dec,int to_who, int bywho);
-//lider -> 1 of os lider 0 otherwise
-struct decision innit_decision(int role,int decision_number);
-struct node innit_node(int role, int lider_id, int id);
-
-struct decision update_decision_state(struct message msg,struct decision dec,struct  node n);
-
-void print_decision(struct decision dec);
-void print_node(struct node n);
 
 
+struct paxos_state update_decision_state_new(struct transition tr,struct paxos_state paxst ,struct  new_no n);
+struct paxos_state innit_state_new(int role, int decision_number,int num_nodes );
+void send_message_paxos_new (struct transition tr);
+struct transition create_new_transition(struct paxos_state paxst,int name,int originNode,int dstNode);
+
+void print_transition(struct transition tr);
+void print_message_type(int msgtype);
+struct new_no innit_node(int role,int lider_id, int id, int window);
+void print_state(struct paxos_state pxs);
 
 #endif
