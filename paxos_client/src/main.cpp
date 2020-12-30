@@ -65,10 +65,10 @@ clean(int signo)
 
 void handleMulticast(byte* in_buffer, uint16_t size, int id){
 	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf(">>Received from (%d) multicast: %s<<\n\n", id, in_buffer);
+	printf(">>Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 }
 
 void handleUnicast(byte* in_buffer, uint16_t size, int id){
 	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf(">>Received from (%d) unicast: %s<<\n\n", id, in_buffer);
+	printf(">>Received from (%d) unicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 }
