@@ -23,14 +23,6 @@ int main(int argc, char *argv[]){
 	net.multi_s.receiveHandle = &handleMulticast;
 	net.uni_s.receiveHandle = &handleUnicast;
 
-	if (rc = pthread_create(&rec_multi_t,
-							NULL,
-							listener,
-							&(net.multi_s))){
-		printf("Error: Unable to create thread, %d\n", rc);
-		exit(EXIT_FAILURE);
-	}
-
 	if (rc = pthread_create(&rec_uni_t,
 							NULL,
 							listener,
