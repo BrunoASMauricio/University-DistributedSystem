@@ -22,6 +22,22 @@ fi
 
 nodes=$(($nodes + 1))
 
+# clean
+function clean(){
+	echo Cleaning
+	# Sub interface route
+	sudo route del \-net 127.0.0.0 netmask 255.255.255.0 dev lo
+	# Multicast route
+	sudo route del \-net 239.255.0.0 netmask 255.255.255.0 dev lo
+
+	for i in $( eval echo {2..$nodes} )
+	do
+		sudo ifconfig lo:$i down
+	done
+	kill 0
+}
+
+trap 'clean' INT
 
 # Sub interface route
 sudo route add \-net 127.0.0.0 netmask 255.255.255.0 dev lo
@@ -37,35 +53,26 @@ do
 	sudo ifconfig lo:$i multicast
 done
 
-cd paxos_node
-make
+./make.sh
 
-# turn nodes on
+# turn nodes on, in separate terminals
 for i in $( eval echo {2..$nodes} )
 do
-	./paxos_node i &
+	echo $i
+	if [ $i == 2 ]
+	then
+		urxvt -e ./paxos_node/paxos_node $i Y &
+	else
+		urxvt -e ./paxos_node/paxos_node $i N &
+
+	fi
 done
 
-cd ../paxos_client
-make
 
 # turn client on
-./paxos_client
+./paxos_client/paxos_client
 
 
-
-
-# clean
-
-# Sub interface route
-sudo route del \-net 127.0.0.0 netmask 255.255.255.0 dev lo
-# Multicast route
-sudo route del \-net 239.255.0.0 netmask 255.255.255.0 dev lo
-
-for i in $( eval echo {2..$nodes} )
-do
-	sudo ifconfig lo:$i down
-done
 
 
 
