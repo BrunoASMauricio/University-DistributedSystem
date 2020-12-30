@@ -1,6 +1,7 @@
 #ifndef NETWORK
 #define NETWORK
 
+#include "paxos.hpp"
 #include "udp.hpp"
 
 // Delay to time out in ns

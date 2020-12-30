@@ -6,18 +6,6 @@ pthread_t rec_multi_t;
 pthread_t rec_uni_t;
 pthread_t timeouts_t;
 
-void
-clean(int signo)
-{
-	printf("Shuttind down node %d\n", id);
-	pthread_cancel(rec_multi_t);
-	pthread_cancel(rec_uni_t);
-	pthread_cancel(timeouts_t);
-	closeSocket(&(net.uni_s));
-	closeSocket(&(net.multi_s));
-	exit(EXIT_SUCCESS);
-}
-
 int main(int argc, char *argv[]){
 	int rc;
 	int nbytes;
@@ -46,6 +34,7 @@ int main(int argc, char *argv[]){
 	initNetwork(id);
 	net.multi_s.receiveHandle = &handleMulticast;
 	net.uni_s.receiveHandle = &handleUnicast;
+
 	if (rc = pthread_create(&rec_multi_t,
 							NULL,
 							listener,
@@ -74,48 +63,42 @@ int main(int argc, char *argv[]){
 	byte  multi_buff[18] = "multi__ hi from X";
 	multi_buff[14] = id + '0';
 	while(1){
-		//unicastDispatcher(uni_buff, sizeof(uni_buff), atoi(argv[2]));
+		//unicastDispatcher(uni_buff, sizeof(uni_buff), 5);
 		//multicastDispatcher(multi_buff, sizeof(multi_buff));
-		sleep(1);
+		sleep(2);
 	}
+}
 
-
-	/*
-	s = &(net.uni_sd);
-	printf("ID: %d\n", id);
-	outbuf[19] = id % 10 + '0';
-	while(1){
-		// Listen unicast
-		do{
-		}while(nbytes > 0);
-
-		// Write unicast
-		sleep(1);
-	}
+void
+clean(int signo)
+{
+	printf("Shutting down node %d\n", id);
+	pthread_cancel(rec_multi_t);
+	pthread_cancel(rec_uni_t);
+	pthread_cancel(timeouts_t);
+	closeSocket(&(net.uni_s));
+	closeSocket(&(net.multi_s));
 	exit(EXIT_SUCCESS);
-
-	while(1){
-		// Listen multicast
-		do{
-		}while(nbytes > 0);
-
-		// Write multicast
-		sleep(1);
-	}
-	*/
 }
 
-void handleMulticast(byte* in_buffer, uint16_t size){
-	if(in_buffer[0] == LEADER_ONLY && !amLeader)
+void handleMulticast(byte* in_buffer, uint16_t size, int id){
+	if(in_buffer[0] == LEADER_ONLY)
 	{
-		return;
+		if(!amLeader)
+		{
+			return;
+		}
+		else
+		{
+			in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
+			printf(">>Received from (%d) multicast: %s<<\n\n", id, in_buffer);
+			unicastDispatcher(in_buffer, size, id);
+		}
 	}
-	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf(">>Received from multicast: %s<<\n\n", in_buffer);
 }
 
-void handleUnicast(byte* in_buffer, uint16_t size){
+void handleUnicast(byte* in_buffer, uint16_t size, int id){
 	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf(">>Received from unicast: %s<<\n\n", in_buffer);
+	printf(">>Received from (%d) unicast: %s<<\n\n", id, in_buffer);
 }
 

@@ -10,8 +10,11 @@
 #include "network.cpp"
 
 
-void handleMulticast(byte* in_buffer, uint16_t size);
+void handleMulticast(byte* in_buffer, uint16_t size, int id);
 
-void handleUnicast(byte* in_buffer, uint16_t size);
+void handleUnicast(byte* in_buffer, uint16_t size, int id);
+
+void clean(int signo);
+
 
 #endif

@@ -65,18 +65,18 @@ void* listener(void* _sock){
 			continue;
 		}
 		
-		// Ignoring multicast sent by themselves
-		if(!strcmp(sender_address, s->interface_addr) || !strcmp(sender_address, "0.0.0.0")){
+		// Ignoring multicast sent by themselves, or with the IGNORE byte
+		if(!strcmp(sender_address, s->interface_addr) || !strcmp(sender_address, "0.0.0.0") || inbuf[0] == IGNORE){
 			continue;
 		}
 
-		printf("Received %d bytes from %s: %s\n", nbytes, inbuf, sender_address);
+		//printf("Received %d bytes from %s: %s\n", nbytes, inbuf, sender_address);
 		if(nbytes > 0){
 			//
 			// DO STUFF HERE
 			//
 			inbuf[nbytes] = '\0';
-			s->receiveHandle(inbuf, nbytes);
+			s->receiveHandle(inbuf, nbytes, atoi(strrchr(sender_address, '.')+1));
 			//printf("Got > %s\n", inbuf);
 		}
 	}
@@ -84,7 +84,16 @@ void* listener(void* _sock){
 }
 
 void dispatcher(sock* s, byte* out_buffer, uint16_t size){
+	static bool hassent = false;
 	int nbytes;
+
+	if(!hassent)
+	{
+		byte msg = IGNORE;
+		hassent = true;
+		dispatcher(s, &msg, 1);
+	}
+	
 	nbytes = sendto(
 		s->sd,
 		out_buffer,

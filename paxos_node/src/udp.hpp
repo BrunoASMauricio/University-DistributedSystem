@@ -29,7 +29,7 @@ typedef struct{
 	char interface_addr[16];				// Interface IP
 	struct sockaddr_in in_addr;				// Input sockaddress
 	struct sockaddr_in out_addr;			// Output sockaddress
-	void (*receiveHandle)(byte*, uint16_t);	// The funcitonthat handles input
+	void (*receiveHandle)(byte*, uint16_t, int);	// The funcitonthat handles input
 }sock;
 
 /*

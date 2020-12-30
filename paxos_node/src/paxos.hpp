@@ -34,7 +34,10 @@
 #define NUMBER_NODES 5
 
 
+// Identify client to leader messages
 #define LEADER_ONLY 1
+// Identify messages to ignore (TEMPORARY HACK)
+#define IGNORE 3
 
 
 

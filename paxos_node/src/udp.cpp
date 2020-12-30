@@ -1,7 +1,7 @@
 #include "udp.hpp"
 
 void startSocket(sock* s){
-	if((s->sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
+	if((s->sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0){
 		perror("Opening UDP socket error");
 		exit(-1);
 	}
@@ -118,7 +118,7 @@ void bindUnicastServer(sock* s){
 
     memset(&(s->in_addr), 0, sizeof(s->in_addr));
     s->in_addr.sin_family = AF_INET;
-    s->in_addr.sin_addr.s_addr =inet_addr(s->interface_addr);
+    s->in_addr.sin_addr.s_addr = inet_addr(s->interface_addr);
     s->in_addr.sin_port = htons(UNICAST_PORT);
 
 	// Bind to receive address
