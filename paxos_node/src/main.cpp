@@ -1,23 +1,48 @@
 #include "main.hpp"
 
+bool amLeader;
+int id;
+pthread_t rec_multi_t;
+pthread_t rec_uni_t;
+pthread_t timeouts_t;
+
+void
+clean(int signo)
+{
+	printf("Shuttind down node %d\n", id);
+	pthread_cancel(rec_multi_t);
+	pthread_cancel(rec_uni_t);
+	pthread_cancel(timeouts_t);
+	closeSocket(&(net.uni_s));
+	closeSocket(&(net.multi_s));
+	exit(EXIT_SUCCESS);
+}
 
 int main(int argc, char *argv[]){
-	int id;
 	int rc;
-	sock* s;
 	int nbytes;
 	char inbuf[1024];
 	char outbuf[1024] = "ola, como estas :)  \n";
-	pthread_t rec_multi_t;
-	pthread_t rec_uni_t;
-	pthread_t timeouts_t;
+
+	signal(SIGINT, clean);
 
 	if(argc != 3){
-		printf("Usage: %s [ID] [TARGET]\n", argv[0]);
+		printf("Usage: %s [ID] [LEADER?=Y|N]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	
 	id = atoi(argv[1]);
+	if(argv[2][0] == 'Y')
+	{
+		amLeader = true;
+		printf("%d starting as leader\n", id);
+	}
+	else
+	{
+		amLeader = false;
+		printf("%d not starting as leader\n", id);
+	}
+
 	initNetwork(id);
 	net.multi_s.receiveHandle = &handleMulticast;
 	net.uni_s.receiveHandle = &handleUnicast;
@@ -46,11 +71,11 @@ int main(int argc, char *argv[]){
 	
 	byte uni_buff[17] = "single hi from X";
 	uni_buff[15] = id + '0';
-	byte  multi_buff[16] = "multi hi from X";
+	byte  multi_buff[18] = "multi__ hi from X";
 	multi_buff[14] = id + '0';
 	while(1){
-		unicastDispatcher(uni_buff, sizeof(uni_buff), atoi(argv[2]));
-		multicastDispatcher(multi_buff, sizeof(multi_buff));
+		//unicastDispatcher(uni_buff, sizeof(uni_buff), atoi(argv[2]));
+		//multicastDispatcher(multi_buff, sizeof(multi_buff));
 		sleep(1);
 	}
 
@@ -81,12 +106,16 @@ int main(int argc, char *argv[]){
 }
 
 void handleMulticast(byte* in_buffer, uint16_t size){
+	if(in_buffer[0] == LEADER_ONLY && !amLeader)
+	{
+		return;
+	}
 	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf("Received from multicast: %s\n", in_buffer);
+	printf(">>Received from multicast: %s<<\n\n", in_buffer);
 }
 
 void handleUnicast(byte* in_buffer, uint16_t size){
 	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf("Received from unicast: %s\n", in_buffer);
+	printf(">>Received from unicast: %s<<\n\n", in_buffer);
 }
 

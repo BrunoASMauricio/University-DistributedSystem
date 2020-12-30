@@ -3,5 +3,12 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include "../../paxos_node/src/network.cpp"
+#include "../../paxos_node/src/udp.cpp"
+#include "../../paxos_node/src/paxos.hpp"
+
+void clean(int signo);
+
+void handleMulticast(byte* in_buffer, uint16_t size);
 
 #endif

@@ -20,6 +20,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>	
 #include <netdb.h>
+#include <pthread.h>
 
 typedef uint8_t byte;
 
@@ -75,6 +76,7 @@ void bindUnicastServer(sock* s);
 void setupUnicastClient(sock* s, int target_addr);
 
 
+void closeSocket(sock *s);
 
 
 

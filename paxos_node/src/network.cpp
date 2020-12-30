@@ -93,6 +93,7 @@ void dispatcher(sock* s, byte* out_buffer, uint16_t size){
 		(struct sockaddr*) &(s->out_addr),
 		sizeof(s->out_addr)
 	);
+	printf("Sent message %s (%d/%d bytes)\n", out_buffer, size, nbytes);
 	if (nbytes < 0) {
 		perror("dispatcher sendto");
 		return;

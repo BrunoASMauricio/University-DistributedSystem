@@ -34,6 +34,8 @@
 #define NUMBER_NODES 5
 
 
+#define LEADER_ONLY 1
+
 
 
 // multicast identificator

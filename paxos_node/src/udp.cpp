@@ -51,6 +51,7 @@ void bindMulticastServer(sock* s){
 
 	// Bind to receive address
     if (bind(s->sd, (struct sockaddr*) &(s->in_addr), sizeof(s->in_addr)) < 0) {
+		printf("Bind error on \n");
 		perror("bind");
 		exit(EXIT_FAILURE);
     }
@@ -142,4 +143,8 @@ void setupUnicast(sock* s, int id){
 	bindUnicastServer(s);
 }
 
+void closeSocket(sock *s)
+{
+	close(s->sd);
+}
 

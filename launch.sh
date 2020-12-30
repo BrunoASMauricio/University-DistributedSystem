@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MULTICAST=239.255.0.0
+
 if [ $# -ne 1 ]
 then
 	echo "Need ammount of nodes as argument"
@@ -28,9 +30,9 @@ function clean(){
 	# Sub interface route
 	sudo route del \-net 127.0.0.0 netmask 255.255.255.0 dev lo
 	# Multicast route
-	sudo route del \-net 239.255.0.0 netmask 255.255.255.0 dev lo
+	sudo route del \-net MULTICAST netmask 255.255.255.0 dev lo
 
-	for i in $( eval echo {2..$nodes} )
+	for i in $( eval echo {2..$interfaces} )
 	do
 		sudo ifconfig lo:$i down
 	done
@@ -42,12 +44,13 @@ trap 'clean' INT
 # Sub interface route
 sudo route add \-net 127.0.0.0 netmask 255.255.255.0 dev lo
 # Multicast route
-sudo route add \-net 239.255.0.0 netmask 255.255.255.0 dev lo
+sudo route add \-net MULTICAST netmask 255.255.255.0 dev lo
 
 # Set interface and respective sub-interfaces for multicast
 sudo ifconfig lo multicast
 
-for i in $( eval echo {2..$nodes} )
+interfaces=$(($nodes + 1))
+for i in $( eval echo {2..$interfaces} )
 do
 	sudo ifconfig lo:$i 127.0.0.$i netmask 255.0.0.0 up
 	sudo ifconfig lo:$i multicast
@@ -61,16 +64,16 @@ do
 	echo $i
 	if [ $i == 2 ]
 	then
-		urxvt -e ./paxos_node/paxos_node $i Y &
+		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i Y &
 	else
-		urxvt -e ./paxos_node/paxos_node $i N &
+		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i N &
 
 	fi
 done
 
 
 # turn client on
-./paxos_client/paxos_client
+./paxos_client/paxos_client $(($nodes + 1))
 
 
 
