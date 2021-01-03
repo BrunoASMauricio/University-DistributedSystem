@@ -2,6 +2,7 @@
 
 bool amLeader;
 int id;
+int node_amm;
 pthread_t rec_multi_t;
 pthread_t rec_uni_t;
 pthread_t timeouts_t;
@@ -18,12 +19,14 @@ int main(int argc, char *argv[]){
 	signal(SIGINT, clean);
 	srand(getpid());
 
-	if(argc != 3){
-		printf("Usage: %s [ID] [LEADER?=Y|N]\n", argv[0]);
+	if(argc != 4){
+		printf("Usage: %s [ID] [LEADER?=Y|N] [NODE AMMOUNT]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	
 	id = atoi(argv[1]);
+	node_amm = atoi(argv[3]);
+
 	if(argv[2][0] == 'Y')
 	{
 		amLeader = true;
@@ -34,6 +37,8 @@ int main(int argc, char *argv[]){
 		amLeader = false;
 		printf("%d not starting as leader\n", id);
 	}
+
+	printf("Starting with id %d, node ammount %d\n", id, node_amm);
 
 	initNetwork(id);
 	net.multi_s.receiveHandle = &handleMulticast;

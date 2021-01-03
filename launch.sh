@@ -9,20 +9,20 @@ then
 fi
 
 re='^[0-9]+$'
-nodes=$1
+node_ammount=$1
 
 if ! [[ $1 =~ $re ]] ; then
-   echo "error: \"$nodes\" is not a number"
+   echo "error: \"$node_ammount\" is not a number"
    exit 1
 fi
 
-if [ $nodes -le 0 ]
+if [ $node_ammount -le 0 ]
 then
 	echo "Node ammount must be greater than 0"
 	exit 1
 fi
 
-nodes=$(($nodes + 1))
+nodes=$(($node_ammount + 1))
 
 # clean
 function clean(){
@@ -64,9 +64,9 @@ do
 	echo $i
 	if [ $i == 2 ]
 	then
-		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i Y &
+		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i Y $node_ammount &
 	else
-		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i N &
+		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i N $node_ammount &
 
 	fi
 done
