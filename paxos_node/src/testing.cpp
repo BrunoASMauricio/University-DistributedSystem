@@ -38,39 +38,40 @@ struct paxos_state{
     int numNodes;
 };
 */
-void writeStatusToFile(paxos_state* st, int id){
+void writeStatusToFile(paxos_state* _st, int id){
 	FILE* fp = NULL;
 	char filename[17];
+	int* st = (int*)_st;
 
 	snprintf(filename, sizeof(filename), "./node_status_%d", id);
-	fp = fopen(filename, "a+");
+	fp = fopen(filename, "w");
 	if(!fp){
 		perror("fopen node_status_..");
 		return;
 	}
-	for(int i = 0; i < sizeof(paxos_state); i+=sizeof(int)){
+	for(int i = 0; i < sizeof(paxos_state)/sizeof(int); i++){
 		printf("%d\n", i);
-		fprintf(fp, "%d\n", &(st[i]));
+		fprintf(fp, "%d\n", st[i]);
 	}
-	//fscanf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", );
 	fclose(fp);
-
-
 }
-int* readStatusFromFile(int id){
+
+paxos_state* readStatusFromFile(int id){
 	FILE* fp;
 	char filename[17];
-	paxos_state* st = (paxos_state*)malloc(sizeof(paxos_state));;
-
+	paxos_state* _st = (paxos_state*)malloc(sizeof(paxos_state));;
+	int* st = (int*)_st;
+	
 	snprintf(filename, sizeof(filename), "./node_status_%d", id);
 	fp = fopen(filename, "r");
 	if(!fp){
 		perror("fopen node_status_..");
 		return NULL;
 	}
-	for(int i = 0; i < sizeof(paxos_state); i+=sizeof(int)){
+	for(int i = 0; i < sizeof(paxos_state)/sizeof(int); i++){
 		printf("%d\n", i);
+		fscanf(fp, "%d\n", &(st[i]));
 	}
-	//fscanf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", );
-
+	fclose(fp);
+	return _st;
 }
