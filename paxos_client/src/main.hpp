@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "../../paxos_node/src/network.cpp"
+#include "../../paxos_node/src/testing.cpp"
 #include "../../paxos_node/src/udp.cpp"
 #include "../../lib/paxos.cpp"
 

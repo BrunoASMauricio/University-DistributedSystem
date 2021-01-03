@@ -8,17 +8,69 @@ bool testLostPacket(byte* buf, uint16_t nbytes){
 	}
 	return false;
 }
+
 void writeToFile(char* string, int id){
 	static FILE* fp = NULL;
-	char filename[9];
+	char filename[10];
 	if(!fp){
-		snprintf(filename, 9, "./node_%d", id);
+		snprintf(filename, sizeof(filename), "./node_%d", id);
 		fp = fopen(filename, "a");
 		if(!fp){
-			perror("fopen");
+			perror("fopen node_..");
 			return;
 		}
 	}
 	fwrite(string, sizeof(char), strlen(string), fp);
 	fflush(fp);
+}
+
+/*
+struct paxos_state{
+    int decisionNumber;
+    int state;
+    int promMessageVal;
+    int promMessageID;
+
+    int currentMessageID ;
+    int currentMessageVal;
+
+    int numReceivedPromises;
+    int numNodes;
+};
+*/
+void writeStatusToFile(paxos_state* st, int id){
+	FILE* fp = NULL;
+	char filename[17];
+
+	snprintf(filename, sizeof(filename), "./node_status_%d", id);
+	fp = fopen(filename, "a+");
+	if(!fp){
+		perror("fopen node_status_..");
+		return;
+	}
+	for(int i = 0; i < sizeof(paxos_state); i+=sizeof(int)){
+		printf("%d\n", i);
+		fprintf(fp, "%d\n", &(st[i]));
+	}
+	//fscanf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", );
+	fclose(fp);
+
+
+}
+int* readStatusFromFile(int id){
+	FILE* fp;
+	char filename[17];
+	paxos_state* st = (paxos_state*)malloc(sizeof(paxos_state));;
+
+	snprintf(filename, sizeof(filename), "./node_status_%d", id);
+	fp = fopen(filename, "r");
+	if(!fp){
+		perror("fopen node_status_..");
+		return NULL;
+	}
+	for(int i = 0; i < sizeof(paxos_state); i+=sizeof(int)){
+		printf("%d\n", i);
+	}
+	//fscanf(fp, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", );
+
 }
