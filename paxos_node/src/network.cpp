@@ -62,6 +62,10 @@ void* listener(void* _sock){
 			&addrlen
 		);
 
+		if(testLostPacket(inbuf, nbytes)){
+			continue;
+		}
+
 		s->in_addr.sin_addr.s_addr;
 		if(getnameinfo((struct sockaddr*)&(s->in_addr), addrlen, sender_address, sizeof(sender_address), 0, 0, NI_NUMERICHOST) != 0){
 			perror("getnameinfo");
@@ -74,7 +78,6 @@ void* listener(void* _sock){
 			continue;
 		}
 
-		//printf("Received %d bytes from %s: %s\n", nbytes, inbuf, sender_address);
 		if(nbytes > 0){
 			//
 			// DO STUFF HERE

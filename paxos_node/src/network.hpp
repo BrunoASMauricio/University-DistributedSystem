@@ -1,8 +1,10 @@
 #ifndef NETWORK
 #define NETWORK
 
+#include "testing.hpp"
 #include "paxos.hpp"
 #include "udp.hpp"
+#include "testing.cpp"
 
 // Delay to time out in ns
 #define PROMISE_TIMEOUT_PERIOD 10E9

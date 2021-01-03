@@ -13,6 +13,7 @@ int main(int argc, char *argv[]){
 	char outbuf[1024] = "ola, como estas :)  \n";
 
 	signal(SIGINT, clean);
+	srand(getpid());
 
 	if(argc != 3){
 		printf("Usage: %s [ID] [LEADER?=Y|N]\n", argv[0]);
