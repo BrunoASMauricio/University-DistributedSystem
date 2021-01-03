@@ -196,7 +196,6 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                     
                 }
             if(tr.name == CLIENT_MSG){
-                printf("ACABOU OU DEVIA AMEN");
                 paxst.state = DECISION_RDY;
                 paxst.currentMessageVal = tr.messageVal;
                 taccept = create_new_transition(paxst,ACCEPT_MSG,n.id, MULTICAST);
@@ -329,6 +328,8 @@ struct new_no innit_node(int role,int lider_id, int id, int window, int nnode){
     n.liderId = lider_id;
     n.id = id;
     n.num_nodes = nnode;
+
+    pthread_mutex_init(&(n.lock), NULL);
     return n;
 }
 
@@ -365,7 +366,7 @@ void change_role_to_aceptor(struct new_no *n, int liderid){
 
 
 
-void Paxos_logic( void *thread_arg)  
+void * Paxos_logic( void *thread_arg)  
 {
     struct new_no *n = (struct new_no *)thread_arg;
     struct transition thelper; 
@@ -373,31 +374,40 @@ void Paxos_logic( void *thread_arg)
     print_node(*n);
 
     printf("Stated paxos logic\n");
-    while(n->lastRunedStateId + 1    != MAX_DECISION){
+    while(1){
 
+        pthread_mutex_lock(&(n->lock)); 
         //printf("running cycle\n");
         if(n->paxosStates[n->lastRunedStateId+1].state == DECISION_RDY){
-            printf("Decision was made");
-            //printf("Decision %d can be runned val %d:",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
-            //return ;
-            //n->lastRunedStateId++;
+            printf("Decision was made\n");
+            printf("Decision %d can be runned val %d:\n",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
+            n->lastRunedStateId++;
+            if (n->lastRunedStateId == MAX_DECISION -1){
+                break;
+            }
         }
 
         if(n->lastPhase1innit == n->lastRunedStateId){
             printf("inniting new window\n");
+            if(n->role == PROPOSER){ // dps tmb tenho que modificar isto
+                sleep(3);
+            }
             for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
                 printf("inniting decision %d\n",i);
                 n->paxosStates[i] = innit_state_new(n->role, i, n->num_nodes );           
                 thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
                 n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
             }
-            n->lastPhase1innit = n->lastPhase1complete + n->windowSize;
+            n->lastPhase1innit = n->lastRunedStateId + n->windowSize;
 
         }
+        pthread_mutex_unlock(&(n->lock)); 
         
         
         sleep(2);
         //usleep(SLEEP_TIME*1000);
     }
+
+    printf("All decisions were made\n");
 };
 

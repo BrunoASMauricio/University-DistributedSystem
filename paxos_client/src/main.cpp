@@ -30,8 +30,8 @@ int main(int argc, char *argv[]){
 		printf("Error: Unable to create thread, %d\n", rc);
 		exit(EXIT_FAILURE);
 	}
-	struct transition tr;
-
+		struct transition tr;
+		int dec_num = 0;
 		while(1){
 		printf("Enter a string to send:\n");
 		if(!fgets(user_input+1, sizeof(user_input)-1, stdin))
@@ -54,9 +54,10 @@ int main(int argc, char *argv[]){
 		tr.name = CLIENT_MSG;
 		
 		//obv isto vai mudar mas por enquanto fica
-		tr.messageVal = 3;
+		tr.messageVal = dec_num +7;
 		tr.dstNodeId  = MULTICAST;
-		tr.decisionNumber = 0;
+		tr.decisionNumber = dec_num ;
+		dec_num +=1;
 
 		send_message_paxos_new (tr);
 

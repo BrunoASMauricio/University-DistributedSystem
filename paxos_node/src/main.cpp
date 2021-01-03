@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
 		printf("Error: Unable to create thread, %d\n", rc);
 		exit(EXIT_FAILURE);
 	}
-	
+
 	byte uni_buff[17] = "single hi from X";
 	uni_buff[15] = id + '0';
 	byte  multi_buff[18] = "multi__ hi from X";
@@ -86,9 +86,19 @@ int main(int argc, char *argv[]){
 	lider_id = 2;
 	
 	n = innit_node(role, lider_id ,id,WINDOW_SIZE,node_amm );
-	Paxos_logic( (void *)&n) ;
+
+	pthread_t idt;
+	if (rc = pthread_create(&idt,
+							NULL,
+							Paxos_logic,
+							(void *)&n)){
+		printf("Error: Unable to create thread, %d\n", rc);
+		exit(EXIT_FAILURE);
+	}
+
+	//Paxos_logic( (void *)&n) ;
 	while(1){
-		
+		sleep(5);
 	}
 
 }
@@ -107,23 +117,28 @@ clean(int signo)
 
 void handleMulticast(byte* in_buffer, uint16_t size, int id){
 	
-	printf(">>------Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
+	//printf(">>------Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
 
-	
+	pthread_mutex_lock(&(n.lock)); 
 			
 	n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
 	print_state(n.paxosStates[tr.decisionNumber]);
 
+	pthread_mutex_unlock(&(n.lock)); 
 }
 
 void handleUnicast(byte* in_buffer, uint16_t size, int id){
 	
-	printf(">>-------------Received from (%d) unicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
+	//printf(">>-------------Received from (%d) unicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 
 	
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
+
+	pthread_mutex_lock(&(n.lock)); 
 	n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
 	print_state(n.paxosStates[tr.decisionNumber]);
+
+	pthread_mutex_unlock(&(n.lock)); 
 }
 

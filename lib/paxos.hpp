@@ -36,7 +36,7 @@
 #define PROPOSER 1
 
 //setting
-#define MAX_DECISION 1
+#define MAX_DECISION 6
 
 
 // Identify client to leader messages
@@ -50,7 +50,7 @@
 #define MULTICAST -1
 
 // Window Size
-#define WINDOW_SIZE 1
+#define WINDOW_SIZE 2
 struct paxos_state{
     int decisionNumber;
     int state;
@@ -75,6 +75,9 @@ struct new_no{
     int lastPhase1complete;
     int lastPhase1innit ;
     int num_nodes;
+
+    pthread_mutex_t lock; 
+
 };
 
 struct transition{
@@ -102,7 +105,7 @@ void print_message_type(int msgtype);
 struct new_no innit_node(int role,int lider_id, int id, int window, int nnumb);
 void print_state(struct paxos_state pxs);
 
-void Paxos_logic( void *thread_arg);
+void * Paxos_logic( void *thread_arg);
 void change_role_to_leader(struct new_no *n);
 void change_role_to_aceptor(struct new_no *n, int liderid);
 
