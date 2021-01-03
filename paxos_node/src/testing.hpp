@@ -2,7 +2,8 @@
 #define test_hpp
 
 #include "udp.hpp"
-#include "paxos.hpp"
+#include "../../lib/paxos.hpp"
+
 
 #define BIT_ERROR_CHANCE 0
 
