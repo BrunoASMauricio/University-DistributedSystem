@@ -52,6 +52,8 @@ void* listener(void* _sock){
 	s = (sock*)_sock;
 
 	while(1){
+		addrlen = sizeof(s->in_addr);
+
 		nbytes = recvfrom(s->sd,
 			inbuf,
 			sizeof(inbuf)-1,			// -1 to temporarily accomodate a \0
@@ -59,15 +61,16 @@ void* listener(void* _sock){
 			(struct sockaddr *) &(s->in_addr),
 			&addrlen
 		);
-		printf("Got %d bytes\n", nbytes);
+
 		s->in_addr.sin_addr.s_addr;
 		if(getnameinfo((struct sockaddr*)&(s->in_addr), addrlen, sender_address, sizeof(sender_address), 0, 0, NI_NUMERICHOST) != 0){
 			perror("getnameinfo");
 			continue;
 		}
-		
-		// Ignoring multicast sent by themselves, or with the IGNORE byte
-		if(!strcmp(sender_address, s->interface_addr) || !strcmp(sender_address, "0.0.0.0") || inbuf[0] == IGNORE){
+		printf("Got %d bytes\n", nbytes);
+
+		// Ignoring multicast sent by themselves
+		if(!strcmp(sender_address, s->interface_addr) || !strcmp(sender_address, "0.0.0.0")){
 			continue;
 		}
 
@@ -87,13 +90,6 @@ void* listener(void* _sock){
 void dispatcher(sock* s, byte* out_buffer, uint16_t size){
 	static bool hassent = false;
 	int nbytes;
-
-	if(!hassent)
-	{
-		byte msg = IGNORE;
-		hassent = true;
-		dispatcher(s, &msg, 1);
-	}
 	
 	nbytes = sendto(
 		s->sd,
