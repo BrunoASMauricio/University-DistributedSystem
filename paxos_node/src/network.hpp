@@ -2,7 +2,7 @@
 #define NETWORK
 
 #include "testing.hpp"
-#include "paxos.hpp"
+#include "../../lib/paxos.hpp"
 #include "udp.hpp"
 #include "testing.cpp"
 

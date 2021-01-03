@@ -37,7 +37,6 @@
 
 //setting
 #define MAX_DECISION 1
-#define NUMBER_NODES 5
 
 
 // Identify client to leader messages
@@ -75,6 +74,7 @@ struct new_no{
     int id;
     int lastPhase1complete;
     int lastPhase1innit ;
+    int num_nodes;
 };
 
 struct transition{
@@ -99,7 +99,7 @@ struct transition create_new_transition(struct paxos_state paxst,int name,int or
 
 void print_transition(struct transition tr);
 void print_message_type(int msgtype);
-struct new_no innit_node(int role,int lider_id, int id, int window);
+struct new_no innit_node(int role,int lider_id, int id, int window, int nnumb);
 void print_state(struct paxos_state pxs);
 
 void Paxos_logic( void *thread_arg);
