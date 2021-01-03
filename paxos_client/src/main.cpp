@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	while(1){
+		while(1){
 		printf("Enter a string to send:\n");
 		if(!fgets(user_input+1, sizeof(user_input)-1, stdin))
 		{
@@ -48,8 +48,19 @@ int main(int argc, char *argv[]){
 			continue;
 		}
 
-		multicastDispatcher((byte*)user_input, strlen(user_input+1)+1);
+
+		struct transition tr;
+		tr.name = CLIENT_MSG;
+		//obv isto vai mudar mas por enquanto fica
+		tr.messageVal = sizeof(strlen(user_input));
+		tr.dstNodeId  = MULTICAST;
+		tr.messageId  = 0;
+
+		send_message_paxos_new (tr);
+
+		//multicastDispatcher((byte*)user_input, strlen(user_input+1)+1);
 	}
+	
 }
 
 void

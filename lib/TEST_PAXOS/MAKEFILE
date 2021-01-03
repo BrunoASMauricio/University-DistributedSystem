@@ -1,0 +1,2 @@
+innit: ../paxos.cpp test.cpp
+	gcc ../paxos.cpp test.cpp -o test

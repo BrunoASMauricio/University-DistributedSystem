@@ -6,6 +6,9 @@ pthread_t rec_multi_t;
 pthread_t rec_uni_t;
 pthread_t timeouts_t;
 
+struct new_no n;
+int lider_id;
+
 int main(int argc, char *argv[]){
 	int rc;
 	int nbytes;
@@ -64,20 +67,22 @@ int main(int argc, char *argv[]){
 	byte  multi_buff[18] = "multi__ hi from X";
 	multi_buff[14] = id + '0';
 
-	int a = 0;
-	sleep(5);	// Wait for all nodes to be up
-
-	while(1){
-		if(id == 3)
-		{
-			uni_buff[15] = a++ + '0';
-			multicastDispatcher(uni_buff, strlen((char*)uni_buff));
-			//unicastDispatcher(uni_buff, strlen((char*)uni_buff), 2);
-		}
-		//unicastDispatcher(uni_buff, sizeof(uni_buff), 5);
-		//multicastDispatcher(multi_buff, sizeof(multi_buff));
-		sleep(2);
+	int role;
+	if(amLeader){
+		sleep(5);
+		role = PROPOSER ;
 	}
+	else{
+		role = ACEPTOR;
+	}
+
+	
+	//2 lider id (change after)
+	lider_id = 2;
+	
+	n = innit_node(role, lider_id ,id,WINDOW_SIZE );
+	Paxos_logic( (void *)&n) ;
+
 }
 
 void
@@ -93,27 +98,24 @@ clean(int signo)
 }
 
 void handleMulticast(byte* in_buffer, uint16_t size, int id){
-	if(in_buffer[0] == LEADER_ONLY)
-	{
-		if(!amLeader)
-		{
-			return;
-		}
-		else
-		{
-			in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-			printf(">>Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
-			unicastDispatcher(in_buffer, size, id);
-		}
-	}
-	else
-	{
-		printf(">>Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
-	}
+	
+	printf(">>------Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
+	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
+
+	
+			
+	n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
+	print_state(n.paxosStates[tr.decisionNumber]);
+
 }
 
 void handleUnicast(byte* in_buffer, uint16_t size, int id){
-	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf(">>Received from (%d) unicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
+	
+	printf(">>-------------Received from (%d) unicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
+
+	
+	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
+	n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
+	print_state(n.paxosStates[tr.decisionNumber]);
 }
 

@@ -50,7 +50,12 @@ void setupMulticast(sock* s);
  */
 void setupUnicast(sock* s, int id);
 
+void setupUnicast(sock* s, int id);
 
+
+void multicastDispatcher(byte* out_buffer, uint16_t size);
+
+void unicastDispatcher(byte* out_buffer, uint16_t size, uint8_t target_id);
 
 network net;
 

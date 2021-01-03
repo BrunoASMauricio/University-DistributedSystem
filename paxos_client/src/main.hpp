@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "../../paxos_node/src/network.cpp"
 #include "../../paxos_node/src/udp.cpp"
-#include "../../paxos_node/src/paxos.hpp"
+#include "../../lib/paxos.cpp"
 
 void clean(int signo);
 

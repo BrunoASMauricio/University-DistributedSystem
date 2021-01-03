@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "paxos.hpp"
+#include "../../lib/paxos.cpp"
 #include "udp.cpp"
 #include "network.cpp"
 
