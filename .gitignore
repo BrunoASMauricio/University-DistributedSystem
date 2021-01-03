@@ -2,3 +2,4 @@ sdis
 Interfaces
 paxos_client/paxos_client
 paxos_node/paxos_node
+node_*

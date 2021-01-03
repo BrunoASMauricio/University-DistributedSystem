@@ -20,4 +20,5 @@ void writeToFile(char* string, int id){
 		}
 	}
 	fwrite(string, sizeof(char), strlen(string), fp);
+	fflush(fp);
 }
