@@ -31,14 +31,15 @@ void* timeoutHandler(void* dummy){
 		clock_gettime(CLOCK_REALTIME, &Res);
 		Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
 		pthread_mutex_lock(&(net.t_s.lock));
-		if(CHECKBIT(PROMISE, net.t_s.timeouts)){
-			if(Act > net.t_s.promise_timeout){
-				//timeout();
-				// DO SOMETHING
-			}
+		if(CHECKBIT(PROMISE, net.t_s.timeouts) && Act > net.t_s.promise_timeout){
+			//timeout();
+			printf("timing out\n");
+			// DO SOMETHING
+		}else{
+			printf("Nothing to timeout\n");
 		}
-		printf("Nothing to timeout\n");
-		sleep(10);
+		pthread_mutex_unlock(&(net.t_s.lock));
+		sleep(1);
 	}
 }
 
