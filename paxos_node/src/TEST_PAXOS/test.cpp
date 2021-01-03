@@ -84,15 +84,19 @@ int main(){
     n2       =  innit_node(ACEPTOR, 4,6,1);
     n3       =  innit_node(ACEPTOR, 4,7,1);
 
+    lider_no.paxosStates[0] = innit_state_new(PROPOSER, 0, NUMBER_NODES );
     t1 = create_new_transition(lider_no.paxosStates[0],NULL_MSG,-1,-1);
     lider_no.paxosStates[0] = update_decision_state_new(t1,lider_no.paxosStates[0],lider_no);
 
+    n1.paxosStates[0] = innit_state_new(ACEPTOR, 0, NUMBER_NODES );
     t1 = create_new_transition(n1.paxosStates[0],NULL_MSG,-1,-1);
     n1.paxosStates[0] = update_decision_state_new(t1,n1.paxosStates[0],n1);
 
+    n2.paxosStates[0] = innit_state_new(ACEPTOR, 0, NUMBER_NODES );
     t1 = create_new_transition(n2.paxosStates[0],NULL_MSG,-1,-1);
     n2.paxosStates[0] = update_decision_state_new(t1,n2.paxosStates[0],n2);
 
+    n3.paxosStates[0] = innit_state_new(ACEPTOR, 0, NUMBER_NODES );
     t1 = create_new_transition(n3.paxosStates[0],NULL_MSG,-1,-1);
     n3.paxosStates[0] = update_decision_state_new(t1,n3.paxosStates[0],n3);
 

@@ -3,7 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
+//SLEEP TIME
+#define SLEEP_TIME 5
 
 //message types , transition types
 #define PREPARE_MSG 0
@@ -89,9 +92,15 @@ struct paxos_state innit_state_new(int role, int decision_number,int num_nodes )
 void send_message_paxos_new (struct transition tr);
 struct transition create_new_transition(struct paxos_state paxst,int name,int originNode,int dstNode);
 
+
 void print_transition(struct transition tr);
 void print_message_type(int msgtype);
 struct new_no innit_node(int role,int lider_id, int id, int window);
 void print_state(struct paxos_state pxs);
 
+void Paxos_logic( void *thread_arg);
+void change_role_to_leader(struct new_no *n);
+void change_role_to_aceptor(struct new_no *n, int liderid);
+
+struct transition receive_message_paxos_new (char *buff);
 #endif

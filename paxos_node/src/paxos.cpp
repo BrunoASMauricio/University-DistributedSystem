@@ -42,17 +42,36 @@ struct paxos_state innit_state_new(int role, int decision_number,int num_nodes )
 
 
 void send_message_paxos_new (struct transition tr){
-    char buff[40];
+   
+    //unicastDispatcher(uni_buff, sizeof(uni_buff), 5);
+    //multicastDispatcher(multi_buff, sizeof(multi_buff));
     if(tr.dstNodeId == MULTICAST){
-        printf("Multicast was sent");
-        print_transition(tr);
-    } 
-    else{
         printf("Unicast was sent");
         print_transition(tr);
+        //multicastDispatcher((char *)&tr, sizeof(tr));
+    } 
+    else{
+       
+        printf("Unicast was sent");
+        print_transition(tr);
+        //unicastDispatcher((char *)&tr, sizeof(tr),  tr.dstNodeId);
     }
 }
 
+struct transition receive_message_paxos_new (char *buff){
+    struct transition t1;
+    struct transition *thelper =  (struct transition *)buff;
+    t1.decisionNumber = thelper->decisionNumber ;
+    t1.name           = thelper->name ;
+    t1.messageId      = thelper->messageId;
+    t1.messageVal     = thelper->messageVal;
+    t1.originNodeId   = thelper->originNodeId ;
+    t1.dstNodeId      = thelper->dstNodeId ;
+    t1.promMessageId  = thelper->promMessageId ;
+    t1.promMessageVal = thelper->promMessageVal;
+    return t1;
+
+}
 struct transition create_new_transition(struct paxos_state paxst,int name,int originNode,int dstNode)
 {
     struct transition t1;
@@ -300,20 +319,52 @@ struct new_no innit_node(int role,int lider_id, int id, int window){
     n.role = role;
     n.liderId = lider_id;
     n.id = id;
-    for(int i=0;i<MAX_DECISION;i++){
-        n.paxosStates[i] = innit_state_new(role,i,NUMBER_NODES);
-    }
     return n;
 }
 
-void Paxos_logic( struct new_no *n)  
+
+void change_role_to_leader(struct new_no *n){
+    n->role    = PROPOSER ;
+    n->liderId = n->id ;
+    struct transition thelper; 
+    //repeats phase 1 pf all messages it does not know the answer to
+    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1complete ;i++){
+        if(n->paxosStates[i].state != DECISION_RDY ){
+                n->paxosStates[i] = innit_state_new(PROPOSER, i, NUMBER_NODES );
+                thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
+                n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
+        }
+    }
+   
+}
+
+void change_role_to_aceptor(struct new_no *n, int liderid){
+    n->role = ACEPTOR ;
+    n->liderId = liderid ;
+    struct transition thelper; 
+    // changes its role to aceptor and for the states it does not have a decision it changes to An acepto statemachine
+    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1complete ;i++){
+        if(n->paxosStates[i].state != DECISION_RDY ){
+                n->paxosStates[i] = innit_state_new(ACEPTOR, i, NUMBER_NODES );
+                thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
+                n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
+        }
+    }
+   
+}
+
+
+
+void Paxos_logic( void *thread_arg)  
 {
+    struct new_no *n = (struct new_no *)thread_arg;
     struct transition thelper; 
   
     
-    while(n->lastRunedStateId +1  != MAX_DECISION){
+    while(n->lastRunedStateId   != MAX_DECISION){
         if(n->lastPhase1complete == n->lastRunedStateId){
             for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
+                n->paxosStates[i] = innit_state_new(n->role, i, NUMBER_NODES );           
                 thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
                 n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
             }
@@ -321,10 +372,10 @@ void Paxos_logic( struct new_no *n)
 
         }
         if(n->paxosStates[n->lastRunedStateId+1].state == DECISION_RDY){
-            printf("Decision %d has benn made val %d:",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
+            printf("Decision %d can be runned val %d:",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
             n->lastRunedStateId++;
         }
-       
+        usleep(SLEEP_TIME*1000);
     }
 };
 
