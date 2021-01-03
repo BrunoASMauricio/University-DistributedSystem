@@ -36,7 +36,7 @@ void* timeoutHandler(void* dummy){
 			printf("timing out\n");
 			// DO SOMETHING
 		}else{
-			printf("Nothing to timeout\n");
+			//printf("Nothing to timeout\n");
 		}
 		pthread_mutex_unlock(&(net.t_s.lock));
 		sleep(1);
