@@ -59,14 +59,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	if (rc = pthread_create(&timeouts_t,
-							NULL,
-							timeoutHandler,
-							NULL)){
-		printf("Error: Unable to create thread, %d\n", rc);
-		exit(EXIT_FAILURE);
-	}
-
+	
 	byte uni_buff[17] = "single hi from X";
 	uni_buff[15] = id + '0';
 	byte  multi_buff[18] = "multi__ hi from X";
@@ -74,7 +67,6 @@ int main(int argc, char *argv[]){
 
 	int role;
 	if(amLeader){
-		sleep(5);
 		role = PROPOSER ;
 	}
 	else{
@@ -95,6 +87,16 @@ int main(int argc, char *argv[]){
 		printf("Error: Unable to create thread, %d\n", rc);
 		exit(EXIT_FAILURE);
 	}
+
+	/*
+	if (rc = pthread_create(&timeouts_t,
+							NULL,
+							timeoutHandler,
+							(void *)&n)){
+		printf("Error: Unable to create thread, %d\n", rc);
+		exit(EXIT_FAILURE);
+	}*/
+
 
 	//Paxos_logic( (void *)&n) ;
 	while(1){
@@ -121,10 +123,10 @@ void handleMulticast(byte* in_buffer, uint16_t size, int id){
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
 
 	pthread_mutex_lock(&(n.lock)); 
-			
-	n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
-	print_state(n.paxosStates[tr.decisionNumber]);
-
+	if(tr.decisionNumber <= n.lastPhase1innit && tr.decisionNumber > n.lastPhase1complete ){		
+		n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
+		print_state(n.paxosStates[tr.decisionNumber]);
+	}
 	pthread_mutex_unlock(&(n.lock)); 
 }
 
@@ -136,8 +138,11 @@ void handleUnicast(byte* in_buffer, uint16_t size, int id){
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
 
 	pthread_mutex_lock(&(n.lock)); 
-	n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
-	print_state(n.paxosStates[tr.decisionNumber]);
+
+	if(tr.decisionNumber <= n.lastPhase1innit && tr.decisionNumber > n.lastPhase1complete ){
+		n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
+		print_state(n.paxosStates[tr.decisionNumber]);
+	}
 
 	pthread_mutex_unlock(&(n.lock)); 
 }

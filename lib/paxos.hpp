@@ -36,7 +36,7 @@
 #define PROPOSER 1
 
 //setting
-#define MAX_DECISION 6
+#define MAX_DECISION 40
 
 
 // Identify client to leader messages
@@ -50,7 +50,7 @@
 #define MULTICAST -1
 
 // Window Size
-#define WINDOW_SIZE 2
+#define WINDOW_SIZE 5
 struct paxos_state{
     int decisionNumber;
     int state;

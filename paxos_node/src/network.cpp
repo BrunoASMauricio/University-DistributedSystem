@@ -27,13 +27,20 @@ void* timeoutHandler(void* dummy){
 	timespec Res;
 	unsigned long int Act;
 	
+	struct transition thelper; 
+	struct new_no *n = (struct new_no *)dummy;
+
 	while(1){
 		clock_gettime(CLOCK_REALTIME, &Res);
 		Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
 		pthread_mutex_lock(&(net.t_s.lock));
 		if(CHECKBIT(PROMISE, net.t_s.timeouts) && Act > net.t_s.promise_timeout){
 			//timeout();
+			thelper.name           = TIMEOUT_MSG;
+			thelper.decisionNumber = 0; //tem que haver im timeout por cada decisao a correr
+
 			printf("timing out\n");
+
 			// DO SOMETHING
 		}else{
 			//printf("Nothing to timeout\n");

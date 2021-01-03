@@ -31,35 +31,37 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 		struct transition tr;
-		int dec_num = 0;
+		int dec_num;
+		int val;
+	
+
 		while(1){
+		
 		printf("Enter a string to send:\n");
-		if(!fgets(user_input+1, sizeof(user_input)-1, stdin))
+		
+		if(scanf("%d %d",&val,&dec_num))
 		{
+				tr.name = CLIENT_MSG;
+		
+				//obv isto vai mudar mas por enquanto fica
+				tr.messageVal = val;
+				tr.dstNodeId  = MULTICAST;
+				tr.decisionNumber = dec_num ;
+				dec_num +=1;
+
+				send_message_paxos_new (tr);
+				
+		}
+		else{
 			printf("Could not read input, please try again\n");
+			printf("format: [int value] [int decision number]\n");
+			int c;
+			while((c = getchar()) != '\n' && c != EOF);
 			continue;
 		}
 
-		user_input[0] = LEADER_ONLY;
-		// Cut the \n
-		user_input[strlen(user_input)-1] = '\0';
 		
-		if(strlen(user_input+1) == 0)
-		{
-			continue;
-		}
-
-
-		
-		tr.name = CLIENT_MSG;
-		
-		//obv isto vai mudar mas por enquanto fica
-		tr.messageVal = dec_num +7;
-		tr.dstNodeId  = MULTICAST;
-		tr.decisionNumber = dec_num ;
-		dec_num +=1;
-
-		send_message_paxos_new (tr);
+	
 
 		//multicastDispatcher((byte*)user_input, strlen(user_input+1)+1);
 	}

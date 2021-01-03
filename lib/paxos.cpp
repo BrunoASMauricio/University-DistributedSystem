@@ -5,7 +5,7 @@
 
 //lider -> 1 of os lider 0 otherwise
 
-
+ int time_out_vec[MAX_DECISION] = {0};
 
 
 struct paxos_state innit_state_new(int role, int decision_number,int num_nodes ){
@@ -42,8 +42,6 @@ struct paxos_state innit_state_new(int role, int decision_number,int num_nodes )
 
 void send_message_paxos_new (struct transition tr){
    
-    //unicastDispatcher(uni_buff, sizeof(uni_buff), 5);
-    //multicastDispatcher(multi_buff, sizeof(multi_buff));
     if(tr.dstNodeId == MULTICAST){
         printf("MULTICAST was sent");
         print_transition(tr);
@@ -138,6 +136,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                 }
                 if(paxst.numReceivedPromises*2 > paxst.numNodes -1){ //alcaçouse a maioria o estado vai transitar
                     paxst.state = END_PHASE_1;
+                    time_out_vec[tr.decisionNumber] = 0; //reset timer
                     
                     if(paxst.promMessageID!= -1) {//got an answer different form what it had so it accpets it
                         paxst.state = DECISION_RDY;
@@ -374,6 +373,8 @@ void * Paxos_logic( void *thread_arg)
     print_node(*n);
 
     printf("Stated paxos logic\n");
+   
+
     while(1){
 
         pthread_mutex_lock(&(n->lock)); 
@@ -389,9 +390,7 @@ void * Paxos_logic( void *thread_arg)
 
         if(n->lastPhase1innit == n->lastRunedStateId){
             printf("inniting new window\n");
-            if(n->role == PROPOSER){ // dps tmb tenho que modificar isto
-                sleep(3);
-            }
+          
             for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
                 printf("inniting decision %d\n",i);
                 n->paxosStates[i] = innit_state_new(n->role, i, n->num_nodes );           
@@ -401,11 +400,26 @@ void * Paxos_logic( void *thread_arg)
             n->lastPhase1innit = n->lastRunedStateId + n->windowSize;
 
         }
+        //updates timers for timeout and activates it in case of timeout, timeouts are counters easier
+        for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
+            if( n->paxosStates[i].state == WAITING_PROMISE){
+                time_out_vec[i] += 1;
+                if(time_out_vec[i] == 1000){
+                    printf("Timing out decision %d",i);
+                    time_out_vec[i] = 0;
+                    thelper = create_new_transition( n->paxosStates[i],TIMEOUT_MSG,-1,-1);
+                    n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
+              
+                    
+                } 
+            }
+        }
+
         pthread_mutex_unlock(&(n->lock)); 
         
         
-        sleep(2);
-        //usleep(SLEEP_TIME*1000);
+       
+        usleep(SLEEP_TIME*1000);
     }
 
     printf("All decisions were made\n");
