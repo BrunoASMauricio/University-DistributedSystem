@@ -71,11 +71,6 @@ int main(int argc, char *argv[]){
 	uni_buff[15] = id + '0';
 	byte  multi_buff[18] = "multi__ hi from X";
 	multi_buff[14] = id + '0';
-	while(1){
-
-
-
-	}
 
 	int role;
 	if(amLeader){
