@@ -62,7 +62,16 @@ int main(int argc, char *argv[]){
 	uni_buff[15] = id + '0';
 	byte  multi_buff[18] = "multi__ hi from X";
 	multi_buff[14] = id + '0';
+
+	int a = 0;
+	sleep(5);
 	while(1){
+		if(id == 3)
+		{
+			uni_buff[15] = a++ + '0';
+			//multicastDispatcher(uni_buff, strlen((char*)uni_buff));
+			//unicastDispatcher(uni_buff, strlen((char*)uni_buff), 2);
+		}
 		//unicastDispatcher(uni_buff, sizeof(uni_buff), 5);
 		//multicastDispatcher(multi_buff, sizeof(multi_buff));
 		sleep(2);
@@ -94,6 +103,10 @@ void handleMulticast(byte* in_buffer, uint16_t size, int id){
 			printf(">>Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 			unicastDispatcher(in_buffer, size, id);
 		}
+	}
+	else
+	{
+		printf(">>Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 	}
 }
 

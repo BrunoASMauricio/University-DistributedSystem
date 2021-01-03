@@ -59,6 +59,7 @@ void* listener(void* _sock){
 			(struct sockaddr *) &(s->in_addr),
 			&addrlen
 		);
+		printf("Got %d bytes\n", nbytes);
 		s->in_addr.sin_addr.s_addr;
 		if(getnameinfo((struct sockaddr*)&(s->in_addr), addrlen, sender_address, sizeof(sender_address), 0, 0, NI_NUMERICHOST) != 0){
 			perror("getnameinfo");
