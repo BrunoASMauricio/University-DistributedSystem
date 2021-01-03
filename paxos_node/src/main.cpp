@@ -90,8 +90,11 @@ int main(int argc, char *argv[]){
 	//2 lider id (change after)
 	lider_id = 2;
 	
-	n = innit_node(role, lider_id ,id,WINDOW_SIZE );
+	n = innit_node(role, lider_id ,id,WINDOW_SIZE,node_amm );
 	Paxos_logic( (void *)&n) ;
+	while(1){
+		
+	}
 
 }
 
