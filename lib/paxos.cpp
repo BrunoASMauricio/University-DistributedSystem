@@ -47,12 +47,14 @@ void send_message_paxos_new (struct transition tr){
     if(tr.dstNodeId == MULTICAST){
         printf("MULTICAST was sent");
         print_transition(tr);
+  
         multicastDispatcher((byte *)&tr, sizeof(tr));
     } 
     else{
        
         printf("Unicast was sent");
         print_transition(tr);
+  
         unicastDispatcher((byte *)&tr, sizeof(tr),  tr.dstNodeId);
     }
 }
@@ -194,6 +196,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                     
                 }
             if(tr.name == CLIENT_MSG){
+                printf("ACABOU OU DEVIA AMEN");
                 paxst.state = DECISION_RDY;
                 paxst.currentMessageVal = tr.messageVal;
                 taccept = create_new_transition(paxst,ACCEPT_MSG,n.id, MULTICAST);
@@ -373,6 +376,13 @@ void Paxos_logic( void *thread_arg)
     while(n->lastRunedStateId + 1    != MAX_DECISION){
 
         //printf("running cycle\n");
+        if(n->paxosStates[n->lastRunedStateId+1].state == DECISION_RDY){
+            printf("Decision was made");
+            //printf("Decision %d can be runned val %d:",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
+            //return ;
+            //n->lastRunedStateId++;
+        }
+
         if(n->lastPhase1innit == n->lastRunedStateId){
             printf("inniting new window\n");
             for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
@@ -385,10 +395,7 @@ void Paxos_logic( void *thread_arg)
 
         }
         
-        if(n->paxosStates[n->lastRunedStateId+1].state == DECISION_RDY){
-            printf("Decision %d can be runned val %d:",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
-            n->lastRunedStateId++;
-        }
+        
         sleep(2);
         //usleep(SLEEP_TIME*1000);
     }
