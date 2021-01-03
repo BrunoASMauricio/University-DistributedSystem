@@ -64,12 +64,13 @@ int main(int argc, char *argv[]){
 	multi_buff[14] = id + '0';
 
 	int a = 0;
-	sleep(5);
+	sleep(5);	// Wait for all nodes to be up
+
 	while(1){
 		if(id == 3)
 		{
 			uni_buff[15] = a++ + '0';
-			//multicastDispatcher(uni_buff, strlen((char*)uni_buff));
+			multicastDispatcher(uni_buff, strlen((char*)uni_buff));
 			//unicastDispatcher(uni_buff, strlen((char*)uni_buff), 2);
 		}
 		//unicastDispatcher(uni_buff, sizeof(uni_buff), 5);
