@@ -3,7 +3,7 @@
 void setupBully(int node_id){
 	el.node_id = node_id;
 	el.am_strongest = true;
-	el.leader_id = 1;
+	el.leader_id = -1;
 	el.st = s_ELECTION;
 	el.message[ARE_U_THERE][0] = ARE_U_THERE;
 	el.message[ARE_U_THERE][1] = node_id;
@@ -46,7 +46,7 @@ void decideLeader(){
 		// Smallest IDs start first
 		// not really necessary
 		// just speeds decision up since it decreases the collision posibility
-		usleep(el.node_id*el.node_id*1000);
+		usleep(el.node_id*el.node_id*el.node_id*1000);
 		// Current leader already started election?
 		printf("Am strongest? %d\n", el.am_strongest);
 		if(el.am_strongest && phase1()){
@@ -57,7 +57,7 @@ void decideLeader(){
 		printf("Waiting for leader\n");
 		usleep(3*RTT);	
 		// What if leader isn't elected??
-	}while(el.st != s_NORMAL);
+	}while(el.leader_id == -1);
 }
 
 void leaderHandle(byte* msg, int size, int id){
@@ -65,7 +65,7 @@ void leaderHandle(byte* msg, int size, int id){
 	pthread_mutex_lock(&(el.lock));
 	switch(msg[0]){
 		case ARE_U_THERE:
-			printf("Got ARE_U_THERE %d %d\n", el.node_id<id, el.am_strongest);
+			printf("Got ARE_U_THERE %d %d\n", el.node_id>id, el.am_strongest);
 			// If stronger than the challenging node AND haven't
 			// backed off (there isn't a stronger node)
 			// reply YES and start a new election
