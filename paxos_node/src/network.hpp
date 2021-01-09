@@ -4,6 +4,7 @@
 #include "testing.hpp"
 #include "../../lib/paxos.hpp"
 #include "udp.hpp"
+#include "leader.hpp"
 
 // Delay to time out in ns
 #define PROMISE_TIMEOUT_PERIOD 10E9
@@ -25,6 +26,21 @@ typedef struct{
 	timeout_schedules t_s;			// Timeout Scheduling
 }network;
 
+enum MTI{
+	NORMAL,
+	LEADER_ELECTION
+};
+
+// Largest admissible UDP packet
+#define MAX_TRANSFER 2048
+
+void*
+/*
+ * The actual listener
+ * First byte (Message Type Identifier) is removed
+ */
+listener(void* _sock);
+	
 void*
 /*
  * Thread that listens to multicast
@@ -51,6 +67,13 @@ void setupUnicast(sock* s, int id);
 
 void setupUnicast(sock* s, int id);
 
+
+void
+/*
+ * Sends a message
+ * Sets the id as the first byte
+ */
+dispatcher(sock* s, byte* _out_buffer, uint16_t size, MTI id);
 
 void multicastDispatcher(byte* out_buffer, uint16_t size);
 

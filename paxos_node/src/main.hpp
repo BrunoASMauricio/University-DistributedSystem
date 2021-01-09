@@ -7,6 +7,7 @@
 #include "../../lib/paxos.cpp"
 #include "udp.cpp"
 #include "network.cpp"
+#include "leader.cpp"
 #include "testing.cpp"
 
 

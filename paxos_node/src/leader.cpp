@@ -7,4 +7,6 @@ void decideLeader(int node_id){
 	
 }
 
+void leaderHandle(byte* msg, int size, int id){
+}
 

@@ -53,8 +53,9 @@ void* timeoutHandler(void* dummy){
 void* listener(void* _sock){
 	sock* s;
 	uint16_t nbytes;
-	byte inbuf[1024];
+	byte inbuf[MAX_TRANSFER];
 	socklen_t addrlen;
+	int received_id;
 	char sender_address[INET6_ADDRSTRLEN];
 
 	s = (sock*)_sock;
@@ -74,12 +75,16 @@ void* listener(void* _sock){
 			continue;
 		}
 
+		if(nbytes == sizeof(inbuf)-1){
+			printf("GOT MAXIMUM SIZE UDP PACKET, THIS MAY BE PROBLEMATIC\n");
+		}
+
 		s->in_addr.sin_addr.s_addr;
 		if(getnameinfo((struct sockaddr*)&(s->in_addr), addrlen, sender_address, sizeof(sender_address), 0, 0, NI_NUMERICHOST) != 0){
 			perror("getnameinfo");
 			continue;
 		}
-		printf("Got %d bytes\n", nbytes);
+		printf("Got %d bytes\n", nbytes-1);
 
 		// Ignoring multicast sent by themselves
 		if(!strcmp(sender_address, s->interface_addr) || !strcmp(sender_address, "0.0.0.0")){
@@ -87,20 +92,30 @@ void* listener(void* _sock){
 		}
 
 		if(nbytes > 0){
-			//
-			// DO STUFF HERE
-			//
-			inbuf[nbytes] = '\0';
-			s->receiveHandle(inbuf, nbytes, atoi(strrchr(sender_address, '.')+1));
-			//printf("Got > %s\n", inbuf);
+			received_id = atoi(strrchr(sender_address, '.')+1);
+			// Decide type of message handle
+			switch(inbuf[0])
+			{
+				case NORMAL:
+					inbuf[nbytes] = '\0';
+					s->receiveHandle(inbuf+1, nbytes-1, received_id);
+					break;
+				case LEADER_ELECTION:
+					leaderHandle(inbuf+1, nbytes-1, received_id);
+					break;
+			}
 		}
 	}
 	return NULL;
 }
 
-void dispatcher(sock* s, byte* out_buffer, uint16_t size){
+void dispatcher(sock* s, byte* _out_buffer, uint16_t size, MTI id){
 	static bool hassent = false;
+	byte out_buffer[MAX_TRANSFER];
 	int nbytes;
+	
+	memcpy(out_buffer+1, _out_buffer, size);
+	out_buffer[0] = id;
 	
 	nbytes = sendto(
 		s->sd,
@@ -110,19 +125,19 @@ void dispatcher(sock* s, byte* out_buffer, uint16_t size){
 		(struct sockaddr*) &(s->out_addr),
 		sizeof(s->out_addr)
 	);
-	printf("Sent message %s (%d/%d bytes)\n", out_buffer, size, nbytes);
+	printf("Sent message (%d/%d bytes)\n", out_buffer, size, nbytes);
 	if (nbytes < 0) {
 		perror("dispatcher sendto");
 		return;
 	}
 }
 void multicastDispatcher(byte* out_buffer, uint16_t size){
-	dispatcher(&(net.multi_s), out_buffer, size);
+	dispatcher(&(net.multi_s), out_buffer, size, NORMAL);
 }
 
 void unicastDispatcher(byte* out_buffer, uint16_t size, uint8_t target_id){
 	setupUnicastClient(&(net.uni_s), target_id);
-	dispatcher(&(net.uni_s), out_buffer, size);
+	dispatcher(&(net.uni_s), out_buffer, size, NORMAL);
 }
 
 void setupMulticast(sock* s){
