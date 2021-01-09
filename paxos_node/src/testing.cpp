@@ -38,6 +38,31 @@ struct paxos_state{
     int numNodes;
 };
 */
+/*
+while(1){
+
+	paxos_state a;
+
+	a.decisionNumber = 1;
+	a.state = 2;
+	a.promMessageVal = 3;
+	a.promMessageID = 4;
+
+	a.currentMessageID = 5;
+	a.currentMessageVal = 6;
+	a.numReceivedPromises = 7;
+	a.numNodes = -8;
+
+	if(id == 3){
+		writeStatusToFile(&a, id);
+		int *b = (int*)readStatusFromFile(id);
+		for(int i = 0; i < sizeof(paxos_state)/sizeof(int); i++){
+			printf("GOT %d\n", b[i]);
+		}
+	}
+	sleep(100);
+}
+*/
 void writeStatusToFile(paxos_state* _st, int id){
 	FILE* fp = NULL;
 	char filename[17];
