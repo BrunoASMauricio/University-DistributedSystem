@@ -1,8 +1,9 @@
 #include "network.hpp"
+
 void* listener(void* _sock){
 	sock* s;
 	uint16_t nbytes;
-	byte inbuf[MAX_TRANSFER];
+	byte inbuf[MAX_TRANSFER+1];
 	socklen_t addrlen;
 	int received_id;
 	char sender_address[INET6_ADDRSTRLEN];
@@ -45,7 +46,7 @@ void* listener(void* _sock){
 			// Decide type of message handle
 			switch(inbuf[0])
 			{
-				case NORMAL:
+				case PAXOS:
 					inbuf[nbytes] = '\0';
 					s->receiveHandle(inbuf+1, nbytes-1, received_id);
 					break;
@@ -58,35 +59,35 @@ void* listener(void* _sock){
 	return NULL;
 }
 
-void dispatcher(sock* s, byte* _out_buffer, uint16_t size, MTI id){
+void dispatcher(sock* s, byte* _out_buffer, uint16_t size, MTI msg_id){
 	static bool hassent = false;
 	byte out_buffer[MAX_TRANSFER];
 	int nbytes;
 	
 	memcpy(out_buffer+1, _out_buffer, size);
-	out_buffer[0] = id;
+	out_buffer[0] = msg_id;
 	
 	nbytes = sendto(
 		s->sd,
 		out_buffer,
-		size,
+		size+1,
 		0,
 		(struct sockaddr*) &(s->out_addr),
 		sizeof(s->out_addr)
 	);
-	printf("Sent message (%d/%d bytes)\n", out_buffer, size, nbytes);
+	printf("Sent message (%d/%d bytes)\n", size, nbytes);
 	if (nbytes < 0) {
 		perror("dispatcher sendto");
 		return;
 	}
 }
-void multicastDispatcher(byte* out_buffer, uint16_t size){
-	dispatcher(&(net.multi_s), out_buffer, size, NORMAL);
+void multicastDispatcher(byte* out_buffer, uint16_t size, MTI msg_id){
+	dispatcher(&(net.multi_s), out_buffer, size, msg_id);
 }
 
-void unicastDispatcher(byte* out_buffer, uint16_t size, uint8_t target_id){
+void unicastDispatcher(byte* out_buffer, uint16_t size, uint8_t target_id, MTI msg_id){
 	setupUnicastClient(&(net.uni_s), target_id);
-	dispatcher(&(net.uni_s), out_buffer, size, NORMAL);
+	dispatcher(&(net.uni_s), out_buffer, size, msg_id);
 }
 
 void setupMulticast(sock* s){

@@ -27,7 +27,7 @@ typedef struct{
 }network;
 
 enum MTI{
-	NORMAL,
+	PAXOS,
 	LEADER_ELECTION
 };
 
@@ -75,9 +75,9 @@ void
  */
 dispatcher(sock* s, byte* _out_buffer, uint16_t size, MTI id);
 
-void multicastDispatcher(byte* out_buffer, uint16_t size);
+void multicastDispatcher(byte* out_buffer, uint16_t size, MTI msg_id);
 
-void unicastDispatcher(byte* out_buffer, uint16_t size, uint8_t target_id);
+void unicastDispatcher(byte* out_buffer, uint16_t size, uint8_t target_id, MTI msg_id);
 
 network net;
 

@@ -8,7 +8,6 @@ pthread_t rec_uni_t;
 pthread_t timeouts_t;
 
 struct new_no n;
-int lider_id;
 
 int main(int argc, char *argv[]){
 	int rc;
@@ -65,19 +64,20 @@ int main(int argc, char *argv[]){
 	byte  multi_buff[18] = "multi__ hi from X";
 	multi_buff[14] = id + '0';
 
+	setupBully(id);
+	printf("Leader: %d\n", el.leader_id);
+
 	int role;
-	if(amLeader){
-		role = PROPOSER ;
+	if(el.leader_id == el.node_id){
+		role = PROPOSER;
+		printf("Beggining Proposer\n");
 	}
 	else{
 		role = ACEPTOR;
+		printf("Beggining Aceptor\n");
 	}
 
-	
-	//2 lider id (change after)
-	lider_id = 2;
-	
-	n = innit_node(role, lider_id ,id,WINDOW_SIZE,node_amm );
+	n = innit_node(role, el.leader_id, id, WINDOW_SIZE, node_amm );
 
 	pthread_t idt;
 	if (rc = pthread_create(&idt,

@@ -46,14 +46,14 @@ void send_message_paxos_new (struct transition tr){
         printf("MULTICAST was sent");
         print_transition(tr);
   
-        multicastDispatcher((byte *)&tr, sizeof(tr));
+        multicastDispatcher((byte *)&tr, sizeof(tr), PAXOS);
     } 
     else{
        
         printf("Unicast was sent");
         print_transition(tr);
   
-        unicastDispatcher((byte *)&tr, sizeof(tr),  tr.dstNodeId);
+        unicastDispatcher((byte *)&tr, sizeof(tr),  tr.dstNodeId, PAXOS);
     }
 }
 
@@ -423,5 +423,6 @@ void * Paxos_logic( void *thread_arg)
     }
 
     printf("All decisions were made\n");
+	return NULL;
 };
 
