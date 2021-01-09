@@ -95,4 +95,12 @@ void
  */
 leaderHandle(byte* msg, int size, int id);
 
+
+void
+/*
+ * Checks if a new election is starting
+ */
+election_check();
+
+
 #endif

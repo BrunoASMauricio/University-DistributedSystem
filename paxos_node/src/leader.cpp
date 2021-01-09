@@ -65,7 +65,7 @@ void leaderHandle(byte* msg, int size, int id){
 	pthread_mutex_lock(&(el.lock));
 	switch(msg[0]){
 		case ARE_U_THERE:
-			printf("Got ARE_U_THERE %d %d\n", el.node_id>id, el.am_strongest);
+			printf("Got ARE_U_THERE %d %d\n", el.node_id > id, el.am_strongest);
 			// If stronger than the challenging node AND haven't
 			// backed off (there isn't a stronger node)
 			// reply YES and start a new election
@@ -90,7 +90,7 @@ void leaderHandle(byte* msg, int size, int id){
 			break;
 
 		case NEW_LEADER:
-			printf("Got NEW_LEADER\n");
+			printf("Got NEW_LEADER %d\n", msg[1]);
 			el.leader_id = msg[1];
 			el.st = s_NORMAL;
 			break;
@@ -111,3 +111,8 @@ void leaderHandle(byte* msg, int size, int id){
 	pthread_mutex_unlock(&(el.lock));
 }
 
+void election_check(){
+	if(el.st == s_ELECTION){
+		decideLeader();
+	}
+}

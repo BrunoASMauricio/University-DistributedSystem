@@ -365,64 +365,56 @@ void change_role_to_aceptor(struct new_no *n, int liderid){
 
 
 
-void * Paxos_logic( void *thread_arg)  
+void * Paxos_logic(void *thread_arg)  
 {
-    struct new_no *n = (struct new_no *)thread_arg;
-    struct transition thelper; 
+    static struct new_no *n = (struct new_no *)thread_arg;
+    static struct transition thelper; 
   
-    print_node(*n);
 
-    printf("Stated paxos logic\n");
+	pthread_mutex_lock(&(n->lock)); 
+	//printf("running cycle\n");
+	if(n->paxosStates[n->lastRunedStateId+1].state == DECISION_RDY){
+		printf("Decision was made\n");
+		printf("Decision %d can be runned val %d:\n",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
+		n->lastRunedStateId++;
+		if (n->lastRunedStateId == MAX_DECISION -1){
+			return NULL;
+		}
+	}
+
+	if(n->lastPhase1innit == n->lastRunedStateId){
+		printf("inniting new window\n");
+	  
+		for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
+			printf("inniting decision %d\n",i);
+			n->paxosStates[i] = innit_state_new(n->role, i, n->num_nodes );           
+			thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
+			n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
+		}
+		n->lastPhase1innit = n->lastRunedStateId + n->windowSize;
+
+	}
+	//updates timers for timeout and activates it in case of timeout, timeouts are counters easier
+	for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
+		if( n->paxosStates[i].state == WAITING_PROMISE){
+			time_out_vec[i] += 1;
+			if(time_out_vec[i] == 1000){
+				printf("Timing out decision %d",i);
+				time_out_vec[i] = 0;
+				thelper = create_new_transition( n->paxosStates[i],TIMEOUT_MSG,-1,-1);
+				n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
+		  
+				
+			} 
+		}
+	}
+
+	pthread_mutex_unlock(&(n->lock)); 
+	
+	
    
+	usleep(SLEEP_TIME*1000);
 
-    while(1){
-
-        pthread_mutex_lock(&(n->lock)); 
-        //printf("running cycle\n");
-        if(n->paxosStates[n->lastRunedStateId+1].state == DECISION_RDY){
-            printf("Decision was made\n");
-            printf("Decision %d can be runned val %d:\n",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
-            n->lastRunedStateId++;
-            if (n->lastRunedStateId == MAX_DECISION -1){
-                break;
-            }
-        }
-
-        if(n->lastPhase1innit == n->lastRunedStateId){
-            printf("inniting new window\n");
-          
-            for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
-                printf("inniting decision %d\n",i);
-                n->paxosStates[i] = innit_state_new(n->role, i, n->num_nodes );           
-                thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
-                n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
-            }
-            n->lastPhase1innit = n->lastRunedStateId + n->windowSize;
-
-        }
-        //updates timers for timeout and activates it in case of timeout, timeouts are counters easier
-        for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
-            if( n->paxosStates[i].state == WAITING_PROMISE){
-                time_out_vec[i] += 1;
-                if(time_out_vec[i] == 1000){
-                    printf("Timing out decision %d",i);
-                    time_out_vec[i] = 0;
-                    thelper = create_new_transition( n->paxosStates[i],TIMEOUT_MSG,-1,-1);
-                    n->paxosStates[i] = update_decision_state_new(thelper,n->paxosStates[i],*n);
-              
-                    
-                } 
-            }
-        }
-
-        pthread_mutex_unlock(&(n->lock)); 
-        
-        
-       
-        usleep(SLEEP_TIME*1000);
-    }
-
-    printf("All decisions were made\n");
 	return NULL;
 };
 

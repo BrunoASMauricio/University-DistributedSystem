@@ -26,6 +26,9 @@ int main(int argc, char *argv[]){
 	
 	printf("Starting with id %d, node ammount %d\n", id, node_amm);
 
+	if(id == 6){
+		sleep(5);
+	}
 	initNetwork(id);
 	net.multi_s.receiveHandle = &handleMulticast;
 	net.uni_s.receiveHandle = &handleUnicast;
@@ -66,6 +69,9 @@ int main(int argc, char *argv[]){
 
 	n = innit_node(role, el.leader_id, id, WINDOW_SIZE, node_amm );
 
+    print_node(n);
+
+	/*
 	pthread_t idt;
 	if (rc = pthread_create(&idt,
 							NULL,
@@ -74,6 +80,7 @@ int main(int argc, char *argv[]){
 		printf("Error: Unable to create thread, %d\n", rc);
 		exit(EXIT_FAILURE);
 	}
+	*/
 
 	/*
 	if (rc = pthread_create(&timeouts_t,
@@ -87,6 +94,8 @@ int main(int argc, char *argv[]){
 
 	//Paxos_logic( (void *)&n) ;
 	while(1){
+		Paxos_logic(&n);
+		election_check();
 		sleep(5);
 	}
 
