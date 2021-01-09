@@ -97,10 +97,10 @@ void setupMulticast(sock* s){
 }
 
 void initNetwork(int id){
-	strcpy(net.multi_s.interface_addr, INTERFACE_BASE_IP);
-	net.multi_s.interface_addr[strlen(net.multi_s.interface_addr)-1] = '0'+id;
-	strcpy(net.uni_s.interface_addr, INTERFACE_BASE_IP);
-	net.uni_s.interface_addr[strlen(net.uni_s.interface_addr)-1] = '0'+id;
+	char addr[16];
+   	sprintf(net.multi_s.interface_addr, "%s.%d", INTERFACE_BASE_IP, id);
+   	sprintf(net.uni_s.interface_addr, "%s.%d", INTERFACE_BASE_IP, id);
+	printf("ADDRESS %s\n", addr);
 	setupMulticast(&(net.multi_s));
 	setupUnicast(&(net.uni_s), id);
 	net.id = id;

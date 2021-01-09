@@ -12,31 +12,18 @@ struct new_no n;
 int main(int argc, char *argv[]){
 	int rc;
 	int nbytes;
-	char inbuf[1024];
-	char outbuf[1024] = "ola, como estas :)  \n";
-
+	
 	signal(SIGINT, clean);
 	srand(getpid());
 
-	if(argc != 4){
-		printf("Usage: %s [ID] [LEADER?=Y|N] [NODE AMMOUNT]\n", argv[0]);
+	if(argc != 3){
+		printf("Usage: %s [ID] [NODE AMMOUNT]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	
 	id = atoi(argv[1]);
-	node_amm = atoi(argv[3]);
-
-	if(argv[2][0] == 'Y')
-	{
-		amLeader = true;
-		printf("%d starting as leader\n", id);
-	}
-	else
-	{
-		amLeader = false;
-		printf("%d not starting as leader\n", id);
-	}
-
+	node_amm = atoi(argv[2]);
+	
 	printf("Starting with id %d, node ammount %d\n", id, node_amm);
 
 	initNetwork(id);
@@ -75,6 +62,9 @@ int main(int argc, char *argv[]){
 	else{
 		role = ACEPTOR;
 		printf("Beggining Aceptor\n");
+	}
+	while(1){
+		sleep(5);
 	}
 
 	n = innit_node(role, el.leader_id, id, WINDOW_SIZE, node_amm );

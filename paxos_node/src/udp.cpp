@@ -129,8 +129,8 @@ void bindUnicastServer(sock* s){
 }
 
 void setupUnicastClient(sock* s, int target_addr){
-	char addr[16] = INTERFACE_BASE_IP;
-	addr[strlen(addr)-1] = '0'+target_addr;
+	char addr[16];
+   	sprintf(addr, "%s.%d", INTERFACE_BASE_IP, target_addr);
 
     memset(&(s->out_addr), 0, sizeof(s->out_addr));
 	s->out_addr.sin_family = AF_INET;

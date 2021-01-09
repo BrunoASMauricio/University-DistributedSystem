@@ -61,14 +61,14 @@ done
 # turn nodes on, in separate terminals
 for i in $( eval echo {2..$nodes} )
 do
-	echo $i
-	if [ $i == 2 ]
-	then
-		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i Y $node_ammount &
-	else
-		urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i N $node_ammount &
-
-	fi
+	#echo $i
+	#if [ $i == 2 ]
+	#then
+	#	urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i Y $node_ammount &
+	#else
+	#	urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i N $node_ammount &
+	#fi
+	urxvt -title paxos_node_$i -e ./paxos_node/paxos_node $i $node_ammount &
 done
 
 

@@ -7,7 +7,7 @@
 #define CHECKBIT(bit,byte) (byte) & (1 << bit)
 
 #define MULTICAST_GROUP "239.255.0.1"
-#define INTERFACE_BASE_IP "127.0.0.0"
+#define INTERFACE_BASE_IP "127.0.0"
 
 #define MULTICAST_PORT 9999
 #define UNICAST_PORT 9998
