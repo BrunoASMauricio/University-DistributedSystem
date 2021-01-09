@@ -34,7 +34,7 @@ void* listener(void* _sock){
 			perror("getnameinfo");
 			continue;
 		}
-		printf("Got %d bytes\n", nbytes-1);
+		//printf("Got %d bytes\n", nbytes-1);
 
 		// Ignoring multicast sent by themselves
 		if(!strcmp(sender_address, s->interface_addr) || !strcmp(sender_address, "0.0.0.0")){
@@ -75,7 +75,7 @@ void dispatcher(sock* s, byte* _out_buffer, uint16_t size, MTI msg_id){
 		(struct sockaddr*) &(s->out_addr),
 		sizeof(s->out_addr)
 	);
-	printf("Sent message (%d/%d bytes)\n", size, nbytes);
+	printf("Sent message (%d/%d bytes)\n", size, nbytes-1);
 	if (nbytes < 0) {
 		perror("dispatcher sendto");
 		return;

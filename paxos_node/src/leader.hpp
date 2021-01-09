@@ -6,6 +6,10 @@
 
 // Network end-to-end RTT in us
 #define RTT 200*1000		// 200ms
+// Time between ARE_U_NORMAL messages in ns
+#define ARE_U_NORMAL_PERIOD ((unsigned long int)(1E9))		// 1s
+// Timeout for ARE_U_NORMAL messages in ns
+#define ARE_U_NORMAL_TIMEOUT ((unsigned long int)(4*1E9))	// 4s
 
 enum bully_state{
 	s_DOWN,
@@ -55,7 +59,10 @@ typedef struct{
 	byte sizes[6] = {2,1,1,2,1,2};
 	bully_state st;
 	pthread_mutex_t lock;
-	unsigned long int timeout;
+	// To timeout with ARE_U_NORMAL
+	unsigned long int ARE_U_NORMAL_last_time;
+	// To send ARE_U_NORMAL
+	unsigned long int ARE_U_NORMAL_check;
 }election;
 
 

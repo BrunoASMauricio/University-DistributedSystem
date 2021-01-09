@@ -4,6 +4,8 @@ void setupBully(int node_id){
 	el.node_id = node_id;
 	el.am_strongest = true;
 	el.leader_id = -1;
+	el.ARE_U_NORMAL_last_time = 0;
+	el.ARE_U_NORMAL_check = 0;
 	el.st = s_ELECTION;
 	el.message[ARE_U_THERE][0] = ARE_U_THERE;
 	el.message[ARE_U_THERE][1] = node_id;
@@ -36,6 +38,7 @@ void phase2(){
 	multicastDispatcher(el.message[NEW_LEADER], el.sizes[NEW_LEADER], LEADER_ELECTION);
 	el.st = s_NORMAL;
 	el.leader_id = el.node_id;
+	el.ARE_U_NORMAL_check = 0;
 }
 
 void decideLeader(){
@@ -46,7 +49,7 @@ void decideLeader(){
 		// Smallest IDs start first
 		// not really necessary
 		// just speeds decision up since it decreases the collision posibility
-		usleep(el.node_id*el.node_id*el.node_id*1000);
+		//usleep(el.node_id*el.node_id*el.node_id*1000);
 		// Current leader already started election?
 		printf("Am strongest? %d\n", el.am_strongest);
 		if(el.am_strongest && phase1()){
@@ -62,6 +65,9 @@ void decideLeader(){
 
 void leaderHandle(byte* msg, int size, int id){
 	byte answer[MAX_TRANSFER];
+	timespec Res;
+	// Multiple threads call this. That isn't a problem but the messages
+	// must be parsed sequentially
 	pthread_mutex_lock(&(el.lock));
 	switch(msg[0]){
 		case ARE_U_THERE:
@@ -78,7 +84,7 @@ void leaderHandle(byte* msg, int size, int id){
 			break;
 
 		case YES:
-			printf("Got YES\n");
+			printf("Got YES from %d\n", id);
 			// Backing off
 			el.st = s_NORMAL;
 			el.am_strongest = false;
@@ -90,15 +96,19 @@ void leaderHandle(byte* msg, int size, int id){
 			break;
 
 		case NEW_LEADER:
-			printf("Got NEW_LEADER %d\n", msg[1]);
+			clock_gettime(CLOCK_REALTIME, &Res);
+			el.ARE_U_NORMAL_last_time = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
 			el.leader_id = msg[1];
 			el.st = s_NORMAL;
+			printf("Got NEW_LEADER %d\n", msg[1]);
 			break;
 
 		case ARE_U_NORMAL:
-			printf("Got ARE_U_NORMAL\n");
+			clock_gettime(CLOCK_REALTIME, &Res);
+			el.ARE_U_NORMAL_last_time = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
 			el.message[STATE][1] = el.st;
 			unicastDispatcher(el.message[STATE], el.sizes[STATE], id, LEADER_ELECTION);
+			printf("Got ARE_U_NORMAL\n");
 			break;
 
 		case STATE:
@@ -112,7 +122,30 @@ void leaderHandle(byte* msg, int size, int id){
 }
 
 void election_check(){
+	timespec Res;
+	unsigned long int Act;
+	
+	clock_gettime(CLOCK_REALTIME, &Res);
+	Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
+
+	pthread_mutex_lock(&(el.lock));
+	if(el.leader_id == el.node_id){
+		if(Act > el.ARE_U_NORMAL_check + ARE_U_NORMAL_PERIOD || el.ARE_U_NORMAL_check == 0){
+			multicastDispatcher(el.message[ARE_U_NORMAL], el.sizes[ARE_U_NORMAL], LEADER_ELECTION);
+			printf("Sending ARE_U_NORMAL\n");
+			el.ARE_U_NORMAL_check = Act;
+		}
+	}else{
+		if(Act > el.ARE_U_NORMAL_last_time + ARE_U_NORMAL_TIMEOUT){
+			el.am_strongest = true;
+			el.st = s_ELECTION;
+			printf("ARE_U_NORMAL timed out\n");
+		}
+	}
+	pthread_mutex_unlock(&(el.lock));
+
 	if(el.st == s_ELECTION){
 		decideLeader();
 	}
+
 }

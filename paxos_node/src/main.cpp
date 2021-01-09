@@ -26,9 +26,6 @@ int main(int argc, char *argv[]){
 	
 	printf("Starting with id %d, node ammount %d\n", id, node_amm);
 
-	if(id == 6){
-		sleep(5);
-	}
 	initNetwork(id);
 	net.multi_s.receiveHandle = &handleMulticast;
 	net.uni_s.receiveHandle = &handleUnicast;
@@ -96,7 +93,6 @@ int main(int argc, char *argv[]){
 	while(1){
 		Paxos_logic(&n);
 		election_check();
-		sleep(5);
 	}
 
 }
