@@ -63,9 +63,6 @@ int main(int argc, char *argv[]){
 		role = ACEPTOR;
 		printf("Beggining Aceptor\n");
 	}
-	while(1){
-		sleep(5);
-	}
 
 	n = innit_node(role, el.leader_id, id, WINDOW_SIZE, node_amm );
 
