@@ -53,7 +53,6 @@ int main(int argc, char *argv[]){
 	setupBully(id);
 	printf("Leader: %d\n", el.leader_id);
 
-	sleep(1000);
 	int role;
 	if(el.leader_id == el.node_id){
 		role = PROPOSER;
