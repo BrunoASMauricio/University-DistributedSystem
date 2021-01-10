@@ -3,7 +3,7 @@
 bool testLostPacket(float error_percentage){
 	float a = (((float)rand()) + ((float)1.0f))/((float)RAND_MAX);
 	if(error_percentage > a){
-		printf("Lost message\n");
+		//printf("Lost message\n");
 		return true;
 	}
 	return false;
