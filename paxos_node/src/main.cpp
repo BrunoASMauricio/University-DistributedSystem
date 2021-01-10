@@ -1,6 +1,5 @@
 #include "main.hpp"
 
-bool amLeader;
 int id;
 int node_amm;
 pthread_t rec_multi_t;
