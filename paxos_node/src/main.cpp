@@ -90,9 +90,32 @@ int main(int argc, char *argv[]){
 
 
 	//Paxos_logic( (void *)&n) ;
+
+    int was_leader = 0;
+
 	while(1){
 		Paxos_logic(&n);
+		n.liderId = el.leader_id;
+		if(el.leader_id == n.id){
+			 was_leader = 1;
+		}
 		election_check();
+
+		if(was_leader == 0){
+			if(el.leader_id == n.id){
+				change_role_to_leader(&n);
+				was_leader = 1;
+			}
+			
+		}
+		if(was_leader == 1){
+			if(el.leader_id != n.id){
+
+				change_role_to_aceptor(&n,el.leader_id);
+				was_leader = 0;		
+			}
+				
+		}
 	}
 
 }

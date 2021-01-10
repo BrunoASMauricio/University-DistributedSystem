@@ -20,6 +20,7 @@ struct paxos_state innit_state_new(int role, int decision_number,int num_nodes )
              pxst.currentMessageVal    = -1;
              pxst.promMessageID        = -1;
              pxst.promMessageVal       = -1;
+
     }
     if(role == ACEPTOR){
              pxst.decisionNumber       = decision_number;
@@ -138,7 +139,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                     paxst.state = END_PHASE_1;
                     time_out_vec[tr.decisionNumber] = 0; //reset timer
                     
-                    if(paxst.promMessageID!= -1) {//got an answer different form what it had so it accpets it
+                    if(paxst.promMessageVal!= -1) {//got an answer different form what it had so it accpets it
                         paxst.state = DECISION_RDY;
                         paxst.currentMessageVal = paxst.promMessageVal;
 
@@ -274,6 +275,7 @@ void print_transition(struct transition tr){
      printf("\n");
      print_message_type(tr.name);
 
+    /*
      printf("----------------decNum: %d\n", tr.decisionNumber);
      printf("----------------messID: %d\n", tr.messageId);
      printf("----------------messVal: %d\n", tr.messageVal);
@@ -281,15 +283,16 @@ void print_transition(struct transition tr){
      printf("----------------DstId: %d\n", tr.dstNodeId);
      printf("----------------PromMsgID: %d\n", tr.promMessageId);
      printf("----------------PromMsgVal: %d\n", tr.promMessageVal);
-
+     */
      printf("\n");
 }
 
 void print_state(struct paxos_state pxs){
      printf("\n");
      print_state_name(pxs.state);
-
+  
     printf("\n----decisionNumber: %d\n", pxs.decisionNumber);
+    /*
     printf("----promMessageVal: %d\n", pxs.promMessageVal);
     printf("----promMessageID: %d\n", pxs.promMessageID);
 
@@ -299,7 +302,7 @@ void print_state(struct paxos_state pxs){
 
     printf("----numReceivedPromises: %d\n", pxs.numReceivedPromises);
     printf("----numNodes: %d\n", pxs.numNodes);
-
+    */
     printf("\n");    
 }
 
@@ -334,11 +337,17 @@ struct new_no innit_node(int role,int lider_id, int id, int window, int nnode){
 
 
 void change_role_to_leader(struct new_no *n){
+    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
+    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
+    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
     n->role    = PROPOSER ;
     n->liderId = n->id ;
     struct transition thelper; 
     //repeats phase 1 pf all messages it does not know the answer to
-    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1complete ;i++){
+    printf("last Runed Stae ID     %d\n",n ->lastRunedStateId +1  );
+    printf("last phase 1 innited %d\n",n->lastPhase1innit );
+
+   for (int i=n->lastRunedStateId+1;i< n->lastPhase1innit+1 ;i++){
         if(n->paxosStates[i].state != DECISION_RDY ){
                 n->paxosStates[i] = innit_state_new(PROPOSER, i, n->num_nodes );
                 thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
@@ -349,11 +358,17 @@ void change_role_to_leader(struct new_no *n){
 }
 
 void change_role_to_aceptor(struct new_no *n, int liderid){
+    printf("CHANGED ROLE TO Aceptor\n");
+    printf("CHANGED ROLE TO Aceptor\n");
+    printf("CHANGED ROLE TO Aceptor\n");
     n->role = ACEPTOR ;
     n->liderId = liderid ;
     struct transition thelper; 
+
+    printf("LAST RUNNES STATE ID +1 : %d\n",n ->lastRunedStateId+1);
+    printf("LAST PHASE 1 INNIT +1 : %d \n",n->lastPhase1innit +1);
     // changes its role to aceptor and for the states it does not have a decision it changes to An acepto statemachine
-    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1complete ;i++){
+    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1innit +1   ;i++){
         if(n->paxosStates[i].state != DECISION_RDY ){
                 n->paxosStates[i] = innit_state_new(ACEPTOR, i,n->num_nodes );
                 thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
