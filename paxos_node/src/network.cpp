@@ -21,7 +21,7 @@ void* listener(void* _sock){
 			&addrlen
 		);
 
-		if(testLostPacket(inbuf, nbytes)){
+		if(testLostPacket(net.error_percentage)){
 			continue;
 		}
 
@@ -99,7 +99,7 @@ void setupMulticast(sock* s){
 	startMulticastClient(s);
 }
 
-void initNetwork(int id){
+void initNetwork(int id, float error_percentage){
 	char addr[16];
    	sprintf(net.multi_s.interface_addr, "%s.%d", INTERFACE_BASE_IP, id);
    	sprintf(net.uni_s.interface_addr, "%s.%d", INTERFACE_BASE_IP, id);
@@ -107,4 +107,5 @@ void initNetwork(int id){
 	setupMulticast(&(net.multi_s));
 	setupUnicast(&(net.uni_s), id);
 	net.id = id;
+	net.error_percentage = error_percentage;
 }

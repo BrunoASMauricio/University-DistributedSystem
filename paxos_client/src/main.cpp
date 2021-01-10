@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
 
 	printf("Starting client with id %d\n", id);
 
-	initNetwork(id);
+	initNetwork(id,0);
 	net.multi_s.receiveHandle = &handleMulticast;
 	net.uni_s.receiveHandle = &handleUnicast;
 
