@@ -108,11 +108,11 @@ void leaderHandle(byte* msg, int size, int id){
 			el.ARE_U_NORMAL_last_time = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
 			el.message[STATE][1] = el.st;
 			unicastDispatcher(el.message[STATE], el.sizes[STATE], id, LEADER_ELECTION);
-			printf("Got ARE_U_NORMAL\n");
+			//printf("Got ARE_U_NORMAL\n");
 			break;
 
 		case STATE:
-			printf("Got STATE\n");
+			//printf("Got STATE\n");
 			if(msg[1] != s_NORMAL){
 				el.st = s_ELECTION;
 			}
