@@ -1,6 +1,5 @@
 #include "main.hpp"
 
-bool amLeader;
 int id;
 int node_amm;
 pthread_t rec_multi_t;
@@ -16,17 +15,17 @@ int main(int argc, char *argv[]){
 	signal(SIGINT, clean);
 	srand(getpid());
 
-	if(argc != 3){
-		printf("Usage: %s [ID] [NODE AMMOUNT]\n", argv[0]);
+	if(argc != 4){
+		printf("Usage: %s [ID] [NODE AMMOUNT] [Error %]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	
 	id = atoi(argv[1]);
 	node_amm = atoi(argv[2]);
 	
-	printf("Starting with id %d, node ammount %d\n", id, node_amm);
+	printf("Starting with id %d, node ammount %d, probability of packet loss: %f\n", id, node_amm, atof(argv[3])/100);
 
-	initNetwork(id);
+	initNetwork(id, atof(argv[3])/100);
 	net.multi_s.receiveHandle = &handleMulticast;
 	net.uni_s.receiveHandle = &handleUnicast;
 

@@ -1,9 +1,9 @@
 #include "testing.hpp"
 
-bool testLostPacket(byte* buf, uint16_t nbytes){
+bool testLostPacket(float error_percentage){
 	float a = (((float)rand()) + ((float)1.0f))/((float)RAND_MAX);
-	if(BIT_ERROR_CHANCE > a){
-		printf("Lost message\n");
+	if(error_percentage > a){
+		//printf("Lost message\n");
 		return true;
 	}
 	return false;
@@ -99,4 +99,34 @@ paxos_state* readStatusFromFile(int id){
 	}
 	fclose(fp);
 	return _st;
+}
+
+int
+range(int min, int max)
+{
+	//49152 through 65535
+	return (rand() % (max - min + 1)) + min;
+}
+
+void* sendMessage(void* _msg){
+	late_message* msg = (late_message*)_msg;
+	int nbytes;
+
+	usleep(range(0,100)*100);	//0 to 10ms
+
+	nbytes = sendto(
+		msg->s->sd,
+		msg->buff,
+		msg->size,
+		0,
+		(struct sockaddr*) &(msg->s->out_addr),
+		sizeof(msg->s->out_addr)
+	);
+	printf("Sent message (%d/%d bytes)\n", msg->size, nbytes);
+	free(msg->buff);
+	free(msg);
+	if (nbytes < 0) {
+		perror("dispatcher sendto");
+	}
+	return NULL;
 }

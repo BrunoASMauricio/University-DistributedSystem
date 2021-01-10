@@ -9,6 +9,9 @@
 // Delay to time out in ns
 #define PROMISE_TIMEOUT_PERIOD 10E9
 
+// Largest admissible UDP packet
+#define MAX_TRANSFER 2048
+
 enum timeouts{
    	PROMISE,
 };
@@ -24,6 +27,7 @@ typedef struct{
 	sock multi_s;					// Multicast socket
 	int id;							// Network ID
 	timeout_schedules t_s;			// Timeout Scheduling
+	float error_percentage;
 }network;
 
 enum MTI{
@@ -31,8 +35,11 @@ enum MTI{
 	LEADER_ELECTION
 };
 
-// Largest admissible UDP packet
-#define MAX_TRANSFER 2048
+typedef struct{
+	byte* buff;
+	int size;
+	sock* s;
+}late_message;
 
 void*
 /*
