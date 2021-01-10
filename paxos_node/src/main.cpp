@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 	id = atoi(argv[1]);
 	node_amm = atoi(argv[2]);
 	
-	printf("Starting with id %d, node ammount %d, probability of packet loss: %f\n", id, node_amm, atof(argv[3]));
+	printf("Starting with id %d, node ammount %d, probability of packet loss: %f\n", id, node_amm, atof(argv[3])/100);
 
 	initNetwork(id, atof(argv[3])/100);
 	net.multi_s.receiveHandle = &handleMulticast;
@@ -53,6 +53,7 @@ int main(int argc, char *argv[]){
 	setupBully(id);
 	printf("Leader: %d\n", el.leader_id);
 
+	sleep(1000);
 	int role;
 	if(el.leader_id == el.node_id){
 		role = PROPOSER;

@@ -22,9 +22,9 @@ then
 	exit 1
 fi
 
-percentage_error=$1
+percentage_error=$2
 
-if ! [[ $1 =~ $re ]] ; then
+if ! [[ $2 =~ $re ]] ; then
    echo "error: \"$percentage_error\" is not a number"
    exit 1
 fi
@@ -34,6 +34,8 @@ then
 	echo "Error percentage must be less than 100 and greater or equal to 0"
 	exit 1
 fi
+
+echo "Launching $node_ammount nodes with packet drop probability of $percentage_error"
 
 nodes=$(($node_ammount + 1))
 
