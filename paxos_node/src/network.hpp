@@ -31,6 +31,12 @@ enum MTI{
 	LEADER_ELECTION
 };
 
+typedef struct{
+	byte* buff;
+	int size;
+	sock* s;
+}late_message;
+
 // Largest admissible UDP packet
 #define MAX_TRANSFER 2048
 

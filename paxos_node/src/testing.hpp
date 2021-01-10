@@ -11,5 +11,6 @@ bool testLostPacket(byte* buf, uint16_t nbytes);
 
 void writeToFile(char* string, int id);
 
+void* sendMessage(void* _msg);
 
 #endif

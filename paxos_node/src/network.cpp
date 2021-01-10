@@ -61,25 +61,28 @@ void* listener(void* _sock){
 
 void dispatcher(sock* s, byte* _out_buffer, uint16_t size, MTI msg_id){
 	static bool hassent = false;
-	byte out_buffer[MAX_TRANSFER];
-	int nbytes;
-	
-	memcpy(out_buffer+1, _out_buffer, size);
+	late_message* msg;
+	byte* out_buffer;
+	int rc;
+
+	out_buffer = (byte*)malloc(sizeof(byte)*size+1);
 	out_buffer[0] = msg_id;
-	
-	nbytes = sendto(
-		s->sd,
-		out_buffer,
-		size+1,
-		0,
-		(struct sockaddr*) &(s->out_addr),
-		sizeof(s->out_addr)
-	);
-	printf("Sent message (%d/%d bytes)\n", size, nbytes-1);
-	if (nbytes < 0) {
-		perror("dispatcher sendto");
-		return;
+	memcpy(out_buffer+1, _out_buffer, size);
+
+	msg = (late_message*)malloc(sizeof(late_message));
+	msg->s = s;
+	msg->buff = out_buffer;
+	msg->size = size+1;
+
+	pthread_t id;
+	if (rc = pthread_create(&id,
+							NULL,
+							sendMessage,
+							(void *)msg)){
+		printf("Error: Unable to create message thread, %d\n", rc);
+		exit(EXIT_FAILURE);
 	}
+	
 }
 void multicastDispatcher(byte* out_buffer, uint16_t size, MTI msg_id){
 	dispatcher(&(net.multi_s), out_buffer, size, msg_id);

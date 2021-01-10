@@ -100,3 +100,33 @@ paxos_state* readStatusFromFile(int id){
 	fclose(fp);
 	return _st;
 }
+
+int
+range(int min, int max)
+{
+	//49152 through 65535
+	return (rand() % (max - min + 1)) + min;
+}
+
+void* sendMessage(void* _msg){
+	late_message* msg = (late_message*)_msg;
+	int nbytes;
+
+	usleep(range(0,100)*100);	//0 to 10ms
+
+	nbytes = sendto(
+		msg->s->sd,
+		msg->buff,
+		msg->size,
+		0,
+		(struct sockaddr*) &(msg->s->out_addr),
+		sizeof(msg->s->out_addr)
+	);
+	printf("Sent message (%d/%d bytes)\n", msg->size, nbytes);
+	free(msg->buff);
+	free(msg);
+	if (nbytes < 0) {
+		perror("dispatcher sendto");
+	}
+	return NULL;
+}
