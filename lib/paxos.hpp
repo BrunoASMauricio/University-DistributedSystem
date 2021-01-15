@@ -19,6 +19,10 @@
 #define CLIENT_MSG	255
 #define TIMEOUT_MSG 4
 #define NULL_MSG -1
+#define ALREADY_AN_ACEPTED_VALUE 5
+
+#define HAS_SOMEONE_DECIDED 6
+#define WHERE_IS_MY_PREPARE 7
 
 
 //states of the the decisions

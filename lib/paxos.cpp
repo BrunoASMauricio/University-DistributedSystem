@@ -20,6 +20,7 @@ struct paxos_state innit_state_new(int role, int decision_number,int num_nodes )
              pxst.currentMessageVal    = -1;
              pxst.promMessageID        = -1;
              pxst.promMessageVal       = -1;
+
     }
     if(role == ACEPTOR){
              pxst.decisionNumber       = decision_number;
@@ -90,7 +91,36 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
     struct transition tprepare ;
     struct transition tpromise;
     struct transition taccept;
+    struct transition talr_acept;
+
     
+    
+    if(tr.name == ALREADY_AN_ACEPTED_VALUE){
+        paxst.state = DECISION_RDY;
+        paxst.currentMessageID = tr.messageId;
+        paxst.currentMessageVal= tr.messageVal;
+        return paxst;
+    }
+
+    if(tr.name == HAS_SOMEONE_DECIDED ){
+        if( paxst.state == DECISION_RDY){
+              talr_acept = create_new_transition(paxst,ALREADY_AN_ACEPTED_VALUE,n.id, tr.originNodeId);
+              send_message_paxos_new(talr_acept);            
+        }
+
+    }
+
+     if(tr.name ==  WHERE_IS_MY_PREPARE ){
+        if( paxst.state == DECISION_RDY){
+              talr_acept = create_new_transition(paxst,ALREADY_AN_ACEPTED_VALUE,n.id, tr.originNodeId);
+              send_message_paxos_new(talr_acept);            
+        }else{
+            tprepare = create_new_transition(paxst,PREPARE_MSG,n.id, MULTICAST);
+            send_message_paxos_new (tprepare ); 
+        }
+
+
+    }
     
     switch (paxst.state)
     {
@@ -99,7 +129,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
             break;
         }
         case INNIT_PROPOSER:{
-            usleep(SLEEP_TIME * 1000 *10); //for know this is cheating
+            usleep (1000* 10);
             paxst.state   =  WAITING_PROMISE;
             tprepare = create_new_transition(paxst,PREPARE_MSG,n.id, MULTICAST);
             send_message_paxos_new (tprepare );
@@ -114,7 +144,15 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                 paxst.promMessageVal =  tr.promMessageVal;
                 tpromise = create_new_transition(paxst,PROMISE_MSG,n.id, n.liderId);
                 send_message_paxos_new(tpromise);
+                time_out_vec[tr.decisionNumber] = 0;   
             }
+
+            if(tr.name == TIMEOUT_MSG){
+                tprepare = create_new_transition(paxst,WHERE_IS_MY_PREPARE,n.id, n.liderId);
+                send_message_paxos_new (tprepare );   
+                time_out_vec[tr.decisionNumber] = 0;                
+            }
+
             break;
         }
 
@@ -124,6 +162,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                 paxst.numReceivedPromises = 0;
                 paxst.promMessageID  = -1;
                 paxst.promMessageVal = -1;
+                time_out_vec[tr.decisionNumber] = 0;
                 tprepare = create_new_transition(paxst,PREPARE_MSG,n.id, MULTICAST);
                 send_message_paxos_new (tprepare );                
             }
@@ -138,7 +177,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                     paxst.state = END_PHASE_1;
                     time_out_vec[tr.decisionNumber] = 0; //reset timer
                     
-                    if(paxst.promMessageID!= -1) {//got an answer different form what it had so it accpets it
+                    if(paxst.promMessageVal!= -1) {//got an answer different form what it had so it accpets it
                         paxst.state = DECISION_RDY;
                         paxst.currentMessageVal = paxst.promMessageVal;
 
@@ -154,13 +193,21 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
         }
 
         case  WAITING_ACEPT :{
+            // a timer here in case of failing in receiving the acept it can inquire
+             if(tr.name == TIMEOUT_MSG){ 
+                tprepare = create_new_transition(paxst,HAS_SOMEONE_DECIDED,n.id, MULTICAST);
+                send_message_paxos_new (tprepare );  
+                time_out_vec[tr.decisionNumber] = 0;              
+            }
+
             if(tr.name == PREPARE_MSG){
                 if(tr.messageId > paxst.promMessageID){ //responds
                     paxst.promMessageID  = tr.messageId;
                     paxst.promMessageVal = tr.messageVal;
                     paxst.state = WAITING_ACEPT; 
                     struct transition tpromise = create_new_transition(paxst,PROMISE_MSG,n.id, n.liderId);
-                    send_message_paxos_new(tpromise);  
+                    send_message_paxos_new(tpromise); 
+                    time_out_vec[tr.decisionNumber] = 0;      
                    }
                 else{ //ignores 
 
@@ -171,7 +218,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                 paxst.state = DECISION_RDY;
                 paxst.currentMessageID = tr.messageId;
                 paxst.currentMessageVal= tr.messageVal;
-          
+                time_out_vec[tr.decisionNumber] = 0;     
             }
            
             break;
@@ -183,7 +230,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                                 paxst.promMessageID  = tr.promMessageId;
                                 paxst.promMessageVal = tr.promMessageVal;
                         }
-                        if(paxst.promMessageID!= -1) {//got an answer different form what it had so it accpets it
+                        if(paxst.promMessageVal!= -1) {//got an answer different form what it had so it accpets it
                             paxst.state = DECISION_RDY;
                             paxst.currentMessageVal = paxst.promMessageVal;
 
@@ -203,6 +250,13 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
             }
             break;
         }
+        case DECISION_RDY:{
+           
+            talr_acept = create_new_transition(paxst,ALREADY_AN_ACEPTED_VALUE,n.id, tr.dstNodeId);
+            send_message_paxos_new(talr_acept);  
+            break;
+
+        }
 
     }
     return paxst;
@@ -212,6 +266,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
 void print_message_type(int msgtype){
     switch (msgtype)
     {
+    
     case PREPARE_MSG:
         printf("PREPARE_MSG");
         break;
@@ -228,7 +283,18 @@ void print_message_type(int msgtype){
     case TIMEOUT_MSG:
         printf("TIMEOUT_MSG");
         break;
+    
+    case ALREADY_AN_ACEPTED_VALUE:
+        printf("ALREADY_AN_ACEPTED_VALUE_MSG");
+        break;
+    
+     case HAS_SOMEONE_DECIDED :
+        printf("HAS_SOMEONE_DECIDED _MSG");
+        break;
+    case WHERE_IS_MY_PREPARE :
+        printf("Where is my prepare");
     }
+  
 }
 
 void print_state_name(int name){
@@ -274,6 +340,7 @@ void print_transition(struct transition tr){
      printf("\n");
      print_message_type(tr.name);
 
+    /*
      printf("----------------decNum: %d\n", tr.decisionNumber);
      printf("----------------messID: %d\n", tr.messageId);
      printf("----------------messVal: %d\n", tr.messageVal);
@@ -281,15 +348,16 @@ void print_transition(struct transition tr){
      printf("----------------DstId: %d\n", tr.dstNodeId);
      printf("----------------PromMsgID: %d\n", tr.promMessageId);
      printf("----------------PromMsgVal: %d\n", tr.promMessageVal);
-
+     */
      printf("\n");
 }
 
 void print_state(struct paxos_state pxs){
      printf("\n");
      print_state_name(pxs.state);
-
+  
     printf("\n----decisionNumber: %d\n", pxs.decisionNumber);
+    /*
     printf("----promMessageVal: %d\n", pxs.promMessageVal);
     printf("----promMessageID: %d\n", pxs.promMessageID);
 
@@ -299,7 +367,7 @@ void print_state(struct paxos_state pxs){
 
     printf("----numReceivedPromises: %d\n", pxs.numReceivedPromises);
     printf("----numNodes: %d\n", pxs.numNodes);
-
+    */
     printf("\n");    
 }
 
@@ -334,11 +402,17 @@ struct new_no innit_node(int role,int lider_id, int id, int window, int nnode){
 
 
 void change_role_to_leader(struct new_no *n){
+    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
+    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
+    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
     n->role    = PROPOSER ;
     n->liderId = n->id ;
     struct transition thelper; 
     //repeats phase 1 pf all messages it does not know the answer to
-    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1complete ;i++){
+    printf("last Runed Stae ID     %d\n",n ->lastRunedStateId +1  );
+    printf("last phase 1 innited %d\n",n->lastPhase1innit );
+
+   for (int i=n->lastRunedStateId+1;i< n->lastPhase1innit+1 ;i++){
         if(n->paxosStates[i].state != DECISION_RDY ){
                 n->paxosStates[i] = innit_state_new(PROPOSER, i, n->num_nodes );
                 thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
@@ -349,11 +423,17 @@ void change_role_to_leader(struct new_no *n){
 }
 
 void change_role_to_aceptor(struct new_no *n, int liderid){
+    printf("CHANGED ROLE TO Aceptor\n");
+    printf("CHANGED ROLE TO Aceptor\n");
+    printf("CHANGED ROLE TO Aceptor\n");
     n->role = ACEPTOR ;
     n->liderId = liderid ;
     struct transition thelper; 
+
+    printf("LAST RUNNES STATE ID +1 : %d\n",n ->lastRunedStateId+1);
+    printf("LAST PHASE 1 INNIT +1 : %d \n",n->lastPhase1innit +1);
     // changes its role to aceptor and for the states it does not have a decision it changes to An acepto statemachine
-    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1complete ;i++){
+    for (int i=n ->lastRunedStateId+1;i< n->lastPhase1innit +1   ;i++){
         if(n->paxosStates[i].state != DECISION_RDY ){
                 n->paxosStates[i] = innit_state_new(ACEPTOR, i,n->num_nodes );
                 thelper = create_new_transition( n->paxosStates[i],NULL_MSG,-1,-1);
@@ -396,9 +476,9 @@ void * Paxos_logic(void *thread_arg)
 	}
 	//updates timers for timeout and activates it in case of timeout, timeouts are counters easier
 	for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
-		if( n->paxosStates[i].state == WAITING_PROMISE){
+		if( (n->paxosStates[i].state == WAITING_PROMISE) || (n->paxosStates[i].state == WAITING_ACEPT) || (n->paxosStates[i].state == WAITING_PREPARE)){
 			time_out_vec[i] += 1;
-			if(time_out_vec[i] == 1000){
+			if(time_out_vec[i] == 3000){
 				printf("Timing out decision %d",i);
 				time_out_vec[i] = 0;
 				thelper = create_new_transition( n->paxosStates[i],TIMEOUT_MSG,-1,-1);
