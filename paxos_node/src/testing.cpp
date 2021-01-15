@@ -10,18 +10,19 @@ bool testLostPacket(float error_percentage){
 }
 
 void writeToFile(char* string, int id){
-	static FILE* fp = NULL;
-	char filename[10];
-	if(!fp){
+	FILE* fp = NULL;
+	static char filename[10] = {0};
+	if(filename[0] == 0){
 		snprintf(filename, sizeof(filename), "./node_%d", id);
-		fp = fopen(filename, "a");
-		if(!fp){
-			perror("fopen node_..");
-			return;
-		}
+	}
+	fp = fopen(filename, "a");
+	if(!fp){
+		perror("fopen node_..");
+		return;
 	}
 	fwrite(string, sizeof(char), strlen(string), fp);
 	fflush(fp);
+	fclose(fp);
 }
 
 /*
