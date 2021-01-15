@@ -51,10 +51,11 @@ function clean(){
 	do
 		sudo ifconfig lo:$i down
 	done
+	# Kill all children
 	kill 0
 }
 
-trap 'clean' INT
+trap 'clean' SIGINT
 
 # Sub interface route
 sudo route add \-net 127.0.0.0 netmask 255.255.255.255 dev lo
