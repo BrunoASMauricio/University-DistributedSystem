@@ -123,7 +123,9 @@ void* sendMessage(void* _msg){
 		(struct sockaddr*) &(msg->s->out_addr),
 		sizeof(msg->s->out_addr)
 	);
-	printf("Sent message (%d/%d bytes)\n", msg->size, nbytes);
+	if(msg->buff[0] != LEADER_ELECTION){
+		printf("Sent message (%d/%d bytes)\n", msg->size, nbytes);
+	}
 	free(msg->buff);
 	free(msg);
 	if (nbytes < 0) {

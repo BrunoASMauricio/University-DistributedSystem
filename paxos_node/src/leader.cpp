@@ -132,7 +132,7 @@ void election_check(){
 	if(el.leader_id == el.node_id){
 		if(Act > el.ARE_U_NORMAL_check + ARE_U_NORMAL_PERIOD || el.ARE_U_NORMAL_check == 0){
 			multicastDispatcher(el.message[ARE_U_NORMAL], el.sizes[ARE_U_NORMAL], LEADER_ELECTION);
-			printf("Sending ARE_U_NORMAL\n");
+			//printf("Sending ARE_U_NORMAL\n");
 			el.ARE_U_NORMAL_check = Act;
 		}
 	}else{
