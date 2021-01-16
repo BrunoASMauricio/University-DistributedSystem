@@ -15,49 +15,49 @@
 #define SLEEP_TIME 5
 
 //message types , transition types
-#define PREPARE_MSG 1
-#define PROMISE_MSG 2
-#define ACCEPT_MSG  3
-#define ACK_MSG     4
+#define PREPARE_MSG 5
+#define PROMISE_MSG 6
+#define ACCEPT_MSG  7
+#define ACK_MSG     8
 #define CLIENT_MSG	255
-#define TIMEOUT_MSG 5
-#define NULL_MSG -1
-#define ALREADY_AN_ACEPTED_VALUE 6
+#define TIMEOUT_MSG 9
+#define NULL_MSG 10
+#define ALREADY_AN_ACEPTED_VALUE 11
 
-#define HAS_SOMEONE_DECIDED 7
-#define WHERE_IS_MY_PREPARE 8
+#define HAS_SOMEONE_DECIDED 12
+#define WHERE_IS_MY_PREPARE 13
 
 
 //states of the the decisions
-#define INNIT_ACCEPTOR  1
-#define WAITING_PREPARE 2
-#define WAITING_ACEPT   3
-#define DECISION_RDY    4 
+#define INNIT_ACCEPTOR  14
+#define WAITING_PREPARE 15
+#define WAITING_ACEPT   16
+#define DECISION_RDY    17
 
-#define INNIT_PROPOSER  5
-#define WAITING_PROMISE 6
-#define END_PHASE_1 7
+#define INNIT_PROPOSER  18
+#define WAITING_PROMISE 19
+#define END_PHASE_1 20
 
 //role
 #define ACEPTOR 1
 #define PROPOSER 2
 
 //setting
-#define MAX_DECISION 40
+#define MAX_DECISION 80
 
 
 // Identify client to leader messages
-#define LEADER_ONLY 1
+#define LEADER_ONLY 34
 // Identify messages to ignore (TEMPORARY HACK)
-#define IGNORE 3
+#define IGNORE 35
 
-
+#define TEST
 
 // multicast identificator
-#define MULTICAST -1
+#define MULTICAST 45
 
 // Window Size
-#define WINDOW_SIZE 5
+#define WINDOW_SIZE 8
 struct paxos_state{
     int decisionNumber;
     int state;
@@ -74,6 +74,7 @@ struct paxos_state{
 struct new_no{
     struct paxos_state paxosStates[MAX_DECISION];
     
+    int n_recv_messages;
     int lastRunedStateId;
     int windowSize;
     int role;
