@@ -516,11 +516,15 @@ void * Paxos_logic(void *thread_arg)
 		if (n->lastRunedStateId == MAX_DECISION -1 && fin==0){
             fin = 1;
             n->lastPhase1innit = MAX_DECISION-1;
+            char bfil[200];
             for(int i= 0;i<MAX_DECISION;i++){
-                
-                printf("Dec %d vall %d nmess %d\n",i,results[i],results_nt[i]);
+               printf("Dec %d vall %d nmess %d\n",i,results[i],results_nt[i]);
+               snprintf(bfil, sizeof(bfil), "Dec %d vall %d num_mens %d\n",i,results[i],results_nt[i]);
+               writeToFile(bfil, n->id);
             }
-			
+           
+
+           
 		}
        
 	}
