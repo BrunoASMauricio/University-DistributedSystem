@@ -44,14 +44,14 @@ struct paxos_state innit_state_new(int role, int decision_number,int num_nodes )
 void send_message_paxos_new (struct transition tr){
    
     if(tr.dstNodeId == MULTICAST){
-        printf("MULTICAST was sent");
+        //printf("MULTICAST was sent");
         print_transition(tr);
   
         multicastDispatcher((byte *)&tr, sizeof(tr), PAXOS);
     } 
     else{
        
-        printf("Unicast was sent");
+        //printf("Unicast was sent");
         print_transition(tr);
   
         unicastDispatcher((byte *)&tr, sizeof(tr),  tr.dstNodeId, PAXOS);
@@ -94,6 +94,11 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
     struct transition talr_acept;
 
     
+    if(paxst.state == DECISION_RDY && tr.name != TIMEOUT_MSG){
+          talr_acept = create_new_transition(paxst,ALREADY_AN_ACEPTED_VALUE,n.id, tr.originNodeId);
+          send_message_paxos_new(talr_acept);   
+          return paxst;  
+    }
     
     if(tr.name == ALREADY_AN_ACEPTED_VALUE){
         paxst.state = DECISION_RDY;
@@ -107,6 +112,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
               talr_acept = create_new_transition(paxst,ALREADY_AN_ACEPTED_VALUE,n.id, tr.originNodeId);
               send_message_paxos_new(talr_acept);            
         }
+        return paxst;
 
     }
 
@@ -118,9 +124,11 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
             tprepare = create_new_transition(paxst,PREPARE_MSG,n.id, MULTICAST);
             send_message_paxos_new (tprepare ); 
         }
+         return paxst;
 
 
     }
+
     
     switch (paxst.state)
     {
@@ -129,7 +137,6 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
             break;
         }
         case INNIT_PROPOSER:{
-            usleep (1000* 10);
             paxst.state   =  WAITING_PROMISE;
             tprepare = create_new_transition(paxst,PREPARE_MSG,n.id, MULTICAST);
             send_message_paxos_new (tprepare );
@@ -173,7 +180,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                     paxst.promMessageID  = tr.promMessageId;
                     paxst.promMessageVal = tr.promMessageVal;
                 }
-                if(paxst.numReceivedPromises*2 > paxst.numNodes -1){ //alcaçouse a maioria o estado vai transitar
+                if(paxst.numReceivedPromises*2 > paxst.numNodes -2){ //alcaçouse a maioria o estado vai transitar
                     paxst.state = END_PHASE_1;
                     time_out_vec[tr.decisionNumber] = 0; //reset timer
                     
@@ -337,7 +344,8 @@ void print_state_name(int name){
 
 
 void print_transition(struct transition tr){
-     printf("\n");
+ 
+     printf(" ");
      print_message_type(tr.name);
 
     /*
@@ -356,7 +364,7 @@ void print_state(struct paxos_state pxs){
      printf("\n");
      print_state_name(pxs.state);
   
-    printf("\n----decisionNumber: %d\n", pxs.decisionNumber);
+    printf(" dec numb: %d\n", pxs.decisionNumber);
     /*
     printf("----promMessageVal: %d\n", pxs.promMessageVal);
     printf("----promMessageID: %d\n", pxs.promMessageID);
@@ -387,6 +395,8 @@ void print_node(struct new_no n){
 
 struct new_no innit_node(int role,int lider_id, int id, int window, int nnode){
     struct new_no n;
+    memset(&n,0,sizeof(n));
+    
     n.windowSize = window;
     n.lastRunedStateId =-1;
     n.lastPhase1innit = -1;
@@ -450,6 +460,7 @@ void * Paxos_logic(void *thread_arg)
     static struct new_no *n = (struct new_no *)thread_arg;
     static struct transition thelper; 
   
+    
 
 	pthread_mutex_lock(&(n->lock)); 
 	//printf("running cycle\n");
@@ -478,7 +489,7 @@ void * Paxos_logic(void *thread_arg)
 	for (int i=n->lastRunedStateId+1;i<n->lastRunedStateId+1+n->windowSize;i++){
 		if( (n->paxosStates[i].state == WAITING_PROMISE) || (n->paxosStates[i].state == WAITING_ACEPT) || (n->paxosStates[i].state == WAITING_PREPARE)){
 			time_out_vec[i] += 1;
-			if(time_out_vec[i] == 3000){
+			if(time_out_vec[i] == 5000){
 				printf("Timing out decision %d",i);
 				time_out_vec[i] = 0;
 				thelper = create_new_transition( n->paxosStates[i],TIMEOUT_MSG,-1,-1);
@@ -493,7 +504,7 @@ void * Paxos_logic(void *thread_arg)
 	
 	
    
-	usleep(SLEEP_TIME*1000);
+	usleep(SLEEP_TIME*200);
 
 	return NULL;
 };

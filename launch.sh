@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+#ERASE PAXOS NODE PREV DATA
+rm ./node_stats/*
+
 MULTICAST=239.255.0.0
 
 if [ $# -ne 2 ]

@@ -64,6 +64,52 @@ while(1){
 	sleep(100);
 }
 */
+
+#define MAX_DECISION_I 40
+
+void writeNodeState(struct new_no n){
+	FILE* fp = NULL;
+	char filename[40];
+
+	snprintf(filename, sizeof(filename), "./node_stats/node_id_%d", n.id);
+	fp = fopen(filename, "w");
+
+	if(!fp){
+		perror("fopen node_status_..");
+		return;
+	}
+    
+	
+    fwrite (&n, sizeof(n), 1, fp); 
+	
+	fclose(fp);	
+}
+
+
+struct new_no  readNodeState(int id, int *err){
+	FILE* fp;
+	char filename[40];
+	struct new_no no;
+	
+	printf("OPENING_FILE: ./node_stats/node_id_%d",id);
+	snprintf(filename, sizeof(filename), "./node_stats/node_id_%d", id);
+
+	fp = fopen(filename, "r");
+	if(!fp){
+		perror("fopen node_status_..");
+		*err = 1;
+		return no;
+	}
+
+	fread(&no, sizeof(struct new_no), 1, fp);
+	fclose(fp);
+	*err = 0;
+	return no;
+}
+
+
+
+
 void writeStatusToFile(paxos_state* _st, int id){
 	FILE* fp = NULL;
 	char filename[17];

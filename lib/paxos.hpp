@@ -8,36 +8,39 @@
 
 #include "../paxos_node/src/network.hpp"
 
+#include "../paxos_node/src/testing.hpp"
+
+
 //SLEEP TIME
 #define SLEEP_TIME 5
 
 //message types , transition types
-#define PREPARE_MSG 0
-#define PROMISE_MSG 1
-#define ACCEPT_MSG  2
-#define ACK_MSG     3
+#define PREPARE_MSG 1
+#define PROMISE_MSG 2
+#define ACCEPT_MSG  3
+#define ACK_MSG     4
 #define CLIENT_MSG	255
-#define TIMEOUT_MSG 4
+#define TIMEOUT_MSG 5
 #define NULL_MSG -1
-#define ALREADY_AN_ACEPTED_VALUE 5
+#define ALREADY_AN_ACEPTED_VALUE 6
 
-#define HAS_SOMEONE_DECIDED 6
-#define WHERE_IS_MY_PREPARE 7
+#define HAS_SOMEONE_DECIDED 7
+#define WHERE_IS_MY_PREPARE 8
 
 
 //states of the the decisions
-#define INNIT_ACCEPTOR  0
-#define WAITING_PREPARE 3
-#define WAITING_ACEPT   5
-#define DECISION_RDY    8 
+#define INNIT_ACCEPTOR  1
+#define WAITING_PREPARE 2
+#define WAITING_ACEPT   3
+#define DECISION_RDY    4 
 
-#define INNIT_PROPOSER  1
+#define INNIT_PROPOSER  5
 #define WAITING_PROMISE 6
-#define END_PHASE_1 13
+#define END_PHASE_1 7
 
 //role
-#define ACEPTOR 0
-#define PROPOSER 1
+#define ACEPTOR 1
+#define PROPOSER 2
 
 //setting
 #define MAX_DECISION 40

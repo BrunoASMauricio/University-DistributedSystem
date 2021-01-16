@@ -53,6 +53,7 @@ int main(int argc, char *argv[]){
 	setupBully(id);
 	printf("Leader: %d\n", el.leader_id);
 
+	int was_leader ;
 	int role;
 	if(el.leader_id == el.node_id){
 		role = PROPOSER;
@@ -63,9 +64,33 @@ int main(int argc, char *argv[]){
 		printf("Beggining Aceptor\n");
 	}
 
-	n = innit_node(role, el.leader_id, id, WINDOW_SIZE, node_amm );
+	int err;
+	n = readNodeState(id,&err);
+	
 
-    print_node(n);
+	if(err == 1){
+		was_leader = 0;
+		printf("\n\n\n\nINNITING NODE\n\n\n\n");
+		n = innit_node(role, el.leader_id, id, WINDOW_SIZE, node_amm );
+	}
+	else{
+		printf("\n\n\n\nINNITING NODE\n\n\n\n");
+		print_node(n);
+		if(el.leader_id == n.id){
+			change_role_to_leader(&n);
+			was_leader = 1;
+		}
+		
+		if(el.leader_id != n.id){
+
+			 change_role_to_aceptor(&n,el.leader_id);
+			 was_leader = 0;		
+		}
+				
+		
+	}
+
+ 
 
 	/*
 	pthread_t idt;
@@ -90,10 +115,16 @@ int main(int argc, char *argv[]){
 
 	//Paxos_logic( (void *)&n) ;
 
-    int was_leader = 0;
+    
+	//writeNodeState(n);
 
 	while(1){
+		
+		
+		
 		Paxos_logic(&n);
+		
+
 		n.liderId = el.leader_id;
 		if(el.leader_id == n.id){
 			 was_leader = 1;
@@ -123,6 +154,7 @@ void
 clean(int signo)
 {
 	printf("Shutting down node %d\n", id);
+	writeNodeState(n);
 	pthread_cancel(rec_multi_t);
 	pthread_cancel(rec_uni_t);
 	pthread_cancel(timeouts_t);
@@ -137,7 +169,7 @@ void handleMulticast(byte* in_buffer, uint16_t size, int id){
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
 
 	pthread_mutex_lock(&(n.lock)); 
-	if(tr.decisionNumber <= n.lastPhase1innit && tr.decisionNumber > n.lastPhase1complete ){		
+	if(tr.decisionNumber <= n.lastPhase1innit ){		
 		n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
 		print_state(n.paxosStates[tr.decisionNumber]);
 	}
@@ -153,7 +185,7 @@ void handleUnicast(byte* in_buffer, uint16_t size, int id){
 
 	pthread_mutex_lock(&(n.lock)); 
 
-	if(tr.decisionNumber <= n.lastPhase1innit && tr.decisionNumber > n.lastPhase1complete ){
+	if(tr.decisionNumber <= n.lastPhase1innit ){
 		n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
 		print_state(n.paxosStates[tr.decisionNumber]);
 	}
