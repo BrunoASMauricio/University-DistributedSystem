@@ -17,6 +17,7 @@ rm -rf ./test_output
 function clean(){
 	echo Cleaning
 	./clean.sh $nodes_max
+	kill 0
 	exit 0
 }
 trap 'clean' SIGINT
