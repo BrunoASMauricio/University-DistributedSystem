@@ -9,22 +9,17 @@ prob_incr=2
 prob_max=4
 
 mkdir -p ./test_output
-if [[ "$EUID" = 0 ]]; then
-    echo "(1) already root"
-else
-    sudo -k # make sure to ask for password on next sudo
-    if sudo true; then
-        echo "(2) correct password"
-    else
-        echo "(3) wrong password"
-        exit 1
-    fi
-fi
 
 rm -rf ./test_output_old
 mv ./test_output/* ./test_output_old
 rm -rf ./test_output
 
+function clean(){
+	echo Cleaning
+	./clean.sh $nodes_max
+	exit 0
+}
+trap 'clean' SIGINT
 for nodes in $( eval echo {$nodes_min..$nodes_max} )
 do
 	for prob in $( eval echo {$prob_min..$prob_max..$prob_incr} )
@@ -44,6 +39,6 @@ do
 		./clean.sh $nodes
 
 		# Move log files
-		mv node_* $dir
+		mv ./node_* $dir
 	done
 done
