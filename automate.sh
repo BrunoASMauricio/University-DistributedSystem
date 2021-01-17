@@ -8,6 +8,8 @@ prob_min=0
 prob_incr=2
 prob_max=4
 
+runs=5
+
 mkdir -p ./test_output
 
 rm -rf ./test_output_old
@@ -26,20 +28,24 @@ do
 	for prob in $( eval echo {$prob_min..$prob_max..$prob_incr} )
 	do
 		echo Starting simulation with $nodes nodes and packet loss chance of $prob%
-		dir=./test_output/$nodes\_$prob
-		# Clean dir
-		rm -rf $dir
-		mkdir -p $dir
+		for run in $( eval echo {0..$runs} )
+		do
+			dir=./test_output/$nodes\_$prob/T_$run
+			# Clean dir
+			rm -rf $dir
+			mkdir -p $dir
 
-		urxvt -title paxos -e ./launch.sh $nodes $prob &
+			urxvt -title paxos -e ./launch.sh $nodes $prob &
 
-		sleep 5
+			sleep 5
 
-		pkill paxos
-		# Always clean to remove pending messages
-		./clean.sh $nodes
+			pkill paxos
+			# Always clean to remove pending messages
+			./clean.sh $nodes
 
-		# Move log files
-		mv ./node_* $dir
+			# Move log files
+			mv ./node_* $dir
+
+		done
 	done
 done
