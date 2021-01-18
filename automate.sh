@@ -1,12 +1,12 @@
 #!/bin/bash
 
-nodes_min=1
-nodes_max=2
+nodes_min=3
+nodes_max=4
 
 prob_min=0
 # how much to increase in range
-prob_incr=2
-prob_max=4
+prob_incr=25
+prob_max=25
 
 runs=5
 
@@ -37,7 +37,7 @@ do
 
 			urxvt -title paxos -e ./launch.sh $nodes $prob &
 
-			sleep 5
+			sleep 40
 
 			pkill paxos
 			# Always clean to remove pending messages

@@ -7,14 +7,20 @@ int client_val[MAX_DECISION];
 #endif
 
 int mes_number;
-
 int fin;
+
+
+struct timeval elapsed_time, innit_time;
+ 
+
 //lider -> 1 of os lider 0 otherwise
 
  int time_out_vec[MAX_DECISION] = {0};
  int results_nt[MAX_DECISION] = {0};
  int results[MAX_DECISION] = {0};
- float results_time[MAX_DECISION] = {0};
+
+
+ double results_time[MAX_DECISION] = {0};
 
 struct paxos_state innit_state_new(int role, int decision_number,int num_nodes ){
     struct  paxos_state pxst;
@@ -411,14 +417,20 @@ void print_node(struct new_no n){
 }
 
 struct new_no innit_node(int role,int lider_id, int id, int window, int nnode){
+
     #ifdef TEST
      
+    
     srandom(124*id);
 
     for(int i= 0;i<MAX_DECISION;i++){
         client_val[i] = random()%1000;
     }
     #endif
+    gettimeofday(&innit_time, NULL);
+//do stuff
+
+    
     fin = 0;
     mes_number = 0;
     struct new_no n;
@@ -511,7 +523,11 @@ void * Paxos_logic(void *thread_arg)
 		printf("Decision %d can be runned val %d:\n",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
 		results_nt[n->lastRunedStateId+1] = mes_number;
         results[n->lastRunedStateId+1] =n->paxosStates[n->lastRunedStateId+1].currentMessageVal;
+        gettimeofday(&elapsed_time, NULL);
+        
+        double a =(elapsed_time.tv_sec*1.0 - innit_time.tv_sec*1.0)*1.0 + (elapsed_time.tv_usec*1.0 - innit_time.tv_usec*1.0)/1000000;
 
+        results_time[n->lastRunedStateId+1] = a;
         n->lastRunedStateId++;
 		if (n->lastRunedStateId == MAX_DECISION -1 && fin==0){
             fin = 1;
@@ -519,7 +535,7 @@ void * Paxos_logic(void *thread_arg)
             char bfil[200];
             for(int i= 0;i<MAX_DECISION;i++){
                printf("Dec %d vall %d nmess %d\n",i,results[i],results_nt[i]);
-               snprintf(bfil, sizeof(bfil), "Dec %d vall %d num_mens %d\n",i,results[i],results_nt[i]);
+               snprintf(bfil, sizeof(bfil), "Dec %d vall %d num_mens %d time %f\n",i,results[i],results_nt[i],results_time[i]);
                writeToFile(bfil, n->id);
             }
            

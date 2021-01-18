@@ -5,10 +5,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <sys/time.h>
+
+
+#include <time.h> 
+
 
 #include "../paxos_node/src/network.hpp"
 
 #include "../paxos_node/src/testing.hpp"
+
 
 
 //SLEEP TIME

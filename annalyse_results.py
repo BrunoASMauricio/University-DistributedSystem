@@ -30,7 +30,7 @@ from os import walk
 f = []
 results_dic = {}
 
-mypath = './saved_results'
+mypath = './sav_2'
 
 #mypath = './s_t'
 
@@ -51,7 +51,7 @@ for el in test_nnu_prob:
     tests.append([el,clean_string(el)])
     
 results = {}
-
+v = '''
 
 for test in tests:
     path = mypath + '/' + test[0]
@@ -79,8 +79,8 @@ for test in tests:
     res = max(r_v)
     results[test[0]] = res
     
- 
-v = '''
+ '''
+
 
 for test in tests:
     path = mypath + '/' + test[0]
@@ -127,7 +127,7 @@ for test in tests:
     results[test[0]] = res
     
 
-'''
+
 res_list = [(k,v) for k,v in results.items()]
 
 
@@ -138,7 +138,7 @@ r_node = np.zeros((11,9))
 
 print(r_node)
 
-for node in range(3,11):
+for node in range(3,9):
     for r in res_list:
         [n,p] = clean_string (r[0])
         if(n == node):
@@ -150,12 +150,15 @@ p_node = r_node.transpose()
 
 
  
-nodes_x = np.array(range(0,11))
-prob_x  = np.array(range(0,9))*5
+nodes_x = np.array(range(0,9))
+prob_x  = np.array(range(0,7))*5
  
 plt.title('Number Messages Vs Error Probability')
 plt.xlabel('Error probability (%)')
 plt.ylabel('Number of Messages on Leader')
+
+plt.xlim([0, 25])
+
 
 plt.plot(prob_x[:7],r_node[3][:7],label = '3 nodes')
 plt.plot(prob_x[:7],r_node[4][:7],label = '4 nodes')
@@ -180,15 +183,15 @@ plt.title('Number Messages Vs Node number')
 plt.xlabel('Node number')
 plt.ylabel('Number of Messages on Leader')
 
-plt.xlim([3, 9])
+plt.xlim([3, 8])
 
-plt.plot(nodes_x[3:-1],p_node[0][3:-1],label =  'error prob 0%')
-plt.plot(nodes_x[3:-1],p_node[1][3:-1],label =  'error prob 5%')
-plt.plot(nodes_x[3:-1],p_node[2][3:-1],label =  'error prob 10%')
-plt.plot(nodes_x[3:-1],p_node[3][3:-1],label =  'error prob 15%')
+plt.plot(nodes_x,p_node[0],label =  'error prob 0%')
+plt.plot(nodes_x,p_node[1],label =  'error prob 5%')
+plt.plot(nodes_x,p_node[2],label =  'error prob 10%')
+plt.plot(nodes_x,p_node[3],label =  'error prob 15%')
 
-plt.plot(nodes_x[3:-1],p_node[4][3:-1],label =  'error prob 20%')
-plt.plot(nodes_x[3:-1],p_node[5][3:-1],label =  'error prob 25%')
+plt.plot(nodes_x,p_node[4],label =  'error prob 20%')
+plt.plot(nodes_x,p_node[5],label =  'error prob 25%')
 
 
 
