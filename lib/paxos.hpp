@@ -57,7 +57,7 @@
 // Identify messages to ignore (TEMPORARY HACK)
 #define IGNORE 35
 
-#define TEST
+//#define TEST
 
 // multicast identificator
 #define MULTICAST 45
