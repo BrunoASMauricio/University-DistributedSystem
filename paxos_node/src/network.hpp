@@ -28,9 +28,11 @@ typedef struct{
 	int id;							// Network ID
 	timeout_schedules t_s;			// Timeout Scheduling
 	float error_percentage;
+	int client_id;
 }network;
 
 enum MTI{
+	CLIENT,
 	PAXOS,
 	LEADER_ELECTION
 };
