@@ -63,7 +63,7 @@
 #define MULTICAST 45
 
 // Window Size
-#define WINDOW_SIZE 8
+#define WINDOW_SIZE 5
 struct paxos_state{
     int decisionNumber;
     int state;

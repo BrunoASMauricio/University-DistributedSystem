@@ -1,4 +1,7 @@
 
+rm -r ./node_stats
+mkdir ./node_stats
+
 cd ./paxos_node
 make
 cd ..

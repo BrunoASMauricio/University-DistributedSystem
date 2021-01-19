@@ -538,6 +538,7 @@ void * Paxos_logic(void *thread_arg)
                snprintf(bfil, sizeof(bfil), "Dec %d vall %d num_mens %d time %f\n",i,results[i],results_nt[i],results_time[i]);
                writeToFile(bfil, n->id);
             }
+            sleep(20);
            
 
            
