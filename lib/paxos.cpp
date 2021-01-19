@@ -520,6 +520,13 @@ void * Paxos_logic(void *thread_arg)
 
 	if(n->paxosStates[n->lastRunedStateId+1].state == DECISION_RDY){
 		printf("Decision was made\n");
+		if(el.leader_id == el.node_id){
+			byte buff[3];
+			buff[0] = CLIENT;
+			buff[1] = ((byte*)&(n->paxosStates[n->lastRunedStateId+1].currentMessageVal))[0];
+			buff[2] = ((byte*)&(n->paxosStates[n->lastRunedStateId+1].decisionNumber))[0];
+			unicastDispatcher(buff, sizeof(buff),  net.client_id, PAXOS);
+		}
 		printf("Decision %d can be runned val %d:\n",n->lastRunedStateId+1,n->paxosStates[n->lastRunedStateId+1].currentMessageVal);
 		results_nt[n->lastRunedStateId+1] = mes_number;
         results[n->lastRunedStateId+1] =n->paxosStates[n->lastRunedStateId+1].currentMessageVal;

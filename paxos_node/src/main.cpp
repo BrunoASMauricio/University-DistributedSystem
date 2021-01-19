@@ -173,6 +173,9 @@ void handleMulticast(byte* in_buffer, uint16_t size, int id){
 		n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
 		print_state(n.paxosStates[tr.decisionNumber]);
 	}
+	if(tr.name == CLIENT_MSG){
+		net.client_id = id;
+	}
 	pthread_mutex_unlock(&(n.lock)); 
 }
 

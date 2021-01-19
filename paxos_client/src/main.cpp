@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
 				dec_num +=1;
 
 				send_message_paxos_new (tr);
-				
+				printf("Waiting for ACK\n");
 		}
 		else{
 			printf("Could not read input, please try again\n");
@@ -59,14 +59,11 @@ int main(int argc, char *argv[]){
 			while((c = getchar()) != '\n' && c != EOF);
 			continue;
 		}
-
-		
-	
-
 		//multicastDispatcher((byte*)user_input, strlen(user_input+1)+1);
 	}
-	
 }
+
+
 
 void
 clean(int signo)
@@ -80,11 +77,10 @@ clean(int signo)
 
 
 void handleMulticast(byte* in_buffer, uint16_t size, int id){
-	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf(">>Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 }
 
 void handleUnicast(byte* in_buffer, uint16_t size, int id){
 	in_buffer[size] = '\0';	// Secured with sizeof(in_buff)-1
-	printf(">>Received from (%d) unicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
+	printf("Received ACK from leader node %d, decision number %d was made with value %d\n", id, in_buffer[2], in_buffer[1]);
+
 }
