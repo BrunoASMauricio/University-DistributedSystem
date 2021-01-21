@@ -44,6 +44,8 @@ int main(int argc, char *argv[]){
 				tr.name = CLIENT_MSG;
 		
 				//obv isto vai mudar mas por enquanto fica
+				//777 is the client id
+				tr.originNodeId = 777;
 				tr.messageVal = val;
 				tr.dstNodeId  = MULTICAST;
 				tr.decisionNumber = dec_num ;

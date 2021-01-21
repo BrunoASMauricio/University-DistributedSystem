@@ -169,7 +169,13 @@ void handleMulticast(byte* in_buffer, uint16_t size, int id){
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
 	printf("\n Recv: ");
 	print_transition(tr);
-	printf(" from node %d",tr.originNodeId);
+	//777 its the client id
+	if(tr.originNodeId == 777){
+			printf(" from CLIENT");	
+	}
+	else{
+			printf(" from node %d",tr.originNodeId);	
+	}
 	
 
 	pthread_mutex_lock(&(n.lock)); 
@@ -192,7 +198,14 @@ void handleUnicast(byte* in_buffer, uint16_t size, int id){
 	//print_transition(tr);
 	printf("\n Recv: ");
 	print_transition(tr);
-	printf(" from node %d",tr.originNodeId);
+	//777 its the client id
+	if(tr.originNodeId == 777){
+			printf(" from CLIENT");	
+	}
+	else{
+			printf(" from node %d",tr.originNodeId);	
+	}
+	
 	//printf("nlastphaseinnit is: %d \n",n.lastPhase1innit );
 	pthread_mutex_lock(&(n.lock)); 
 

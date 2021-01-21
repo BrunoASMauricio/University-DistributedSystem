@@ -49,6 +49,8 @@
 #define ACEPTOR 1
 #define PROPOSER 2
 
+#define CLIENT_ID 777
+
 //setting
 #define MAX_DECISION 6
 
@@ -64,7 +66,7 @@
 #define MULTICAST 45
 
 // Window Size
-#define WINDOW_SIZE 3
+#define WINDOW_SIZE 2
 struct paxos_state{
     int decisionNumber;
     int state;
