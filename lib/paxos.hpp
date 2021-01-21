@@ -29,6 +29,7 @@
 #define TIMEOUT_MSG 9
 #define NULL_MSG 10
 #define ALREADY_AN_ACEPTED_VALUE 11
+#define ACCEPTED_MSG 999
 
 #define HAS_SOMEONE_DECIDED 12
 #define WHERE_IS_MY_PREPARE 13
@@ -49,7 +50,7 @@
 #define PROPOSER 2
 
 //setting
-#define MAX_DECISION 80
+#define MAX_DECISION 6
 
 
 // Identify client to leader messages
@@ -63,7 +64,7 @@
 #define MULTICAST 45
 
 // Window Size
-#define WINDOW_SIZE 5
+#define WINDOW_SIZE 3
 struct paxos_state{
     int decisionNumber;
     int state;

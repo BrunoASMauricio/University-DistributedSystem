@@ -59,6 +59,7 @@ void send_message_paxos_new (struct transition tr){
    
     if(tr.dstNodeId == MULTICAST){
         //printf("MULTICAST was sent");
+        printf("\nSend MSG: ");
         print_transition(tr);
   
         multicastDispatcher((byte *)&tr, sizeof(tr), PAXOS);
@@ -66,6 +67,7 @@ void send_message_paxos_new (struct transition tr){
     else{
        
         //printf("Unicast was sent");
+        printf("\nSend MSG: ");
         print_transition(tr);
   
         unicastDispatcher((byte *)&tr, sizeof(tr),  tr.dstNodeId, PAXOS);
@@ -231,7 +233,7 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
                 time_out_vec[tr.decisionNumber] = 0;              
             }
 
-            if(tr.name == PREPARE_MSG){
+            if(tr.name == PREPARE_MSG ){
                 if(tr.messageId > paxst.promMessageID){ //responds
                     paxst.promMessageID  = tr.messageId;
                     paxst.promMessageVal = tr.messageVal;
@@ -246,10 +248,15 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
 
             }
             if(tr.name == ACCEPT_MSG){
+                 if(tr.promMessageId >= paxst.promMessageID){
+                 struct transition tpromise = create_new_transition(paxst,ACCEPTED_MSG,n.id, n.liderId);
+                send_message_paxos_new(tpromise); 
+
                 paxst.state = DECISION_RDY;
                 paxst.currentMessageID = tr.messageId;
                 paxst.currentMessageVal= tr.messageVal;
-                time_out_vec[tr.decisionNumber] = 0;     
+                time_out_vec[tr.decisionNumber] = 0;   
+                 }  
             }
            
             break;
@@ -282,7 +289,19 @@ struct paxos_state update_decision_state_new(struct transition tr,struct paxos_s
             break;
         }
         case DECISION_RDY:{
-           
+             if(tr.name == PREPARE_MSG ){
+                if(tr.messageId > paxst.promMessageID +1 ){ //responds
+                    paxst.promMessageID  = tr.messageId;
+                    paxst.promMessageVal = tr.messageVal;
+                    paxst.state = WAITING_ACEPT; 
+                    struct transition tpromise = create_new_transition(paxst,PROMISE_MSG,n.id, n.liderId);
+                    send_message_paxos_new(tpromise); 
+                    time_out_vec[tr.decisionNumber] = 0;      
+                   }
+                else{ //ignores 
+
+                } 
+             }
              
             break;
 
@@ -323,6 +342,11 @@ void print_message_type(int msgtype){
         break;
     case WHERE_IS_MY_PREPARE :
         printf("Where is my prepare");
+        break;
+   
+    case ACCEPTED_MSG:
+        printf("ACCEPTED_MSG");
+        break;
     }
   
 }
@@ -451,9 +475,8 @@ struct new_no innit_node(int role,int lider_id, int id, int window, int nnode){
 
 
 void change_role_to_leader(struct new_no *n){
-    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
-    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
-    printf("CHANGED ROLE TO LEADER MANINHO MEGA FIXE\n");
+    printf("CHANGED ROLE TO LEADER \n");
+
     n->role    = PROPOSER ;
     n->liderId = n->id ;
     struct transition thelper; 
@@ -473,8 +496,7 @@ void change_role_to_leader(struct new_no *n){
 
 void change_role_to_aceptor(struct new_no *n, int liderid){
     printf("CHANGED ROLE TO Aceptor\n");
-    printf("CHANGED ROLE TO Aceptor\n");
-    printf("CHANGED ROLE TO Aceptor\n");
+
     n->role = ACEPTOR ;
     n->liderId = liderid ;
     struct transition thelper; 
@@ -497,10 +519,12 @@ void * Paxos_logic(void *thread_arg)
 {
     static struct new_no *n = (struct new_no *)thread_arg;
     static struct transition thelper; 
-  
+    
     
 	usleep(SLEEP_TIME*200);
-
+    if(fin == 1){
+        return NULL;
+    }
 
 	pthread_mutex_lock(&(n->lock)); 
 	//printf("running cycle\n");
@@ -545,7 +569,10 @@ void * Paxos_logic(void *thread_arg)
                snprintf(bfil, sizeof(bfil), "Dec %d vall %d num_mens %d time %f\n",i,results[i],results_nt[i],results_time[i]);
                writeToFile(bfil, n->id);
             }
-            sleep(20);
+            pthread_mutex_unlock(&(n->lock)); 
+	
+            return NULL;
+           // sleep(20);
            
 
            

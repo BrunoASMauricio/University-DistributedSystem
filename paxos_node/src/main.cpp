@@ -167,7 +167,11 @@ void handleMulticast(byte* in_buffer, uint16_t size, int id){
 	
 	//printf(">>------Received from (%d) multicast: %s (%d bytes)<<\n\n", id, in_buffer, size);
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
-	//print_transition(tr);
+	printf("\n Recv: ");
+	print_transition(tr);
+	printf(" from node %d",tr.originNodeId);
+	
+
 	pthread_mutex_lock(&(n.lock)); 
 	if(tr.decisionNumber <= n.lastPhase1innit ){		
 		n.paxosStates[tr.decisionNumber] = update_decision_state_new(tr,n.paxosStates[tr.decisionNumber],n);
@@ -186,7 +190,9 @@ void handleUnicast(byte* in_buffer, uint16_t size, int id){
 	
 	struct transition tr = receive_message_paxos_new ((char *)in_buffer);
 	//print_transition(tr);
-
+	printf("\n Recv: ");
+	print_transition(tr);
+	printf(" from node %d",tr.originNodeId);
 	//printf("nlastphaseinnit is: %d \n",n.lastPhase1innit );
 	pthread_mutex_lock(&(n.lock)); 
 

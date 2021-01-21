@@ -170,7 +170,7 @@ void* sendMessage(void* _msg){
 		sizeof(msg->s->out_addr)
 	);
 	if(msg->buff[0] != LEADER_ELECTION){
-		printf("Sent message (%d/%d bytes)\n", msg->size, nbytes);
+		//printf("Sent message (%d/%d bytes)\n", msg->size, nbytes);
 	}
 	free(msg->buff);
 	free(msg);
